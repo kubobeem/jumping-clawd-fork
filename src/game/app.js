@@ -26,16 +26,16 @@ import {
   CLAWD_JUMP_TIMING,
   CLAWD_SCENE_SCALE,
   CLAWD_TOP_PADDING_RATIO,
-  COMPETITIVE_CURRENT_SURFACE_RATIO,
-  COMPETITIVE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER,
-  COMPETITIVE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO,
-  COMPETITIVE_MODE_DRIFT_ACCELERATION_RATIO,
-  COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
-  COMPETITIVE_MODE_DRIFT_MAX_SPEED_RATIO,
-  COMPETITIVE_TARGET_HORIZONTAL_DISTANCE_MAX_RATIO,
-  COMPETITIVE_TARGET_HORIZONTAL_DISTANCE_MIN_RATIO,
-  COMPETITIVE_TARGET_VERTICAL_GAP_MAX_RATIO,
-  COMPETITIVE_TARGET_VERTICAL_GAP_MIN_RATIO,
+  CHALLENGE_CURRENT_SURFACE_RATIO,
+  CHALLENGE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER,
+  CHALLENGE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO,
+  CHALLENGE_MODE_DRIFT_ACCELERATION_RATIO,
+  CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
+  CHALLENGE_MODE_DRIFT_MAX_SPEED_RATIO,
+  CHALLENGE_TARGET_HORIZONTAL_DISTANCE_MAX_RATIO,
+  CHALLENGE_TARGET_HORIZONTAL_DISTANCE_MIN_RATIO,
+  CHALLENGE_TARGET_VERTICAL_GAP_MAX_RATIO,
+  CHALLENGE_TARGET_VERTICAL_GAP_MIN_RATIO,
   CYCLE_DURATION_FRAMES,
   CURRENT_SURFACE_RATIO,
   JUMP_HANGTIME_LIFT_RATIO,
@@ -85,7 +85,7 @@ import {
 } from "./math.js";
 
 const PAGE_SURFACE_THEMES = new Set(["light", "dark"]);
-const GAME_MODES = new Set(["casual", "competitive"]);
+const GAME_MODES = new Set(["casual", "challenge"]);
 const DEFAULT_GAME_MODE = "casual";
 
 const getInitialPageSurfaceTheme = () => {
@@ -109,7 +109,7 @@ const getInitialGameMode = () => {
 document.documentElement.dataset.pageSurface = getInitialPageSurfaceTheme();
 const gameMode = getInitialGameMode();
 document.documentElement.dataset.gameMode = gameMode;
-const isCompetitiveMode = () => gameMode === "competitive";
+const isChallengeMode = () => gameMode === "challenge";
 
 const {
   stage,
@@ -148,7 +148,7 @@ let initialized = false;
 let frameRequest = 0;
 // World surface height that maps to the current ledge position on screen.
 let cameraSurfaceY = 0;
-const competitiveModeDrift = {
+const challengeModeDrift = {
   startedAt: 0,
   lastAppliedAt: 0,
 };
@@ -291,28 +291,28 @@ const getJumpLift = (power) =>
     clamp01(power),
   );
 
-const resetCompetitiveModeDrift = (now) => {
-  competitiveModeDrift.startedAt = now;
-  competitiveModeDrift.lastAppliedAt = now;
+const resetChallengeModeDrift = (now) => {
+  challengeModeDrift.startedAt = now;
+  challengeModeDrift.lastAppliedAt = now;
 };
 
-const getCompetitiveModeDriftSpeedRatio = (elapsedSeconds) => {
+const getChallengeModeDriftSpeedRatio = (elapsedSeconds) => {
   const elapsed = Math.max(0, elapsedSeconds);
   const maxSpeedRatio = Math.max(
-    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
-    COMPETITIVE_MODE_DRIFT_MAX_SPEED_RATIO,
+    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
+    CHALLENGE_MODE_DRIFT_MAX_SPEED_RATIO,
   );
 
   return clamp(
-    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO +
-      COMPETITIVE_MODE_DRIFT_ACCELERATION_RATIO * elapsed +
-      COMPETITIVE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO * elapsed * elapsed,
-    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
+    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO +
+      CHALLENGE_MODE_DRIFT_ACCELERATION_RATIO * elapsed +
+      CHALLENGE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO * elapsed * elapsed,
+    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
     maxSpeedRatio,
   );
 };
 
-const getCompetitiveModeDriftSpeedIntegral = ({ startSeconds, endSeconds }) => {
+const getChallengeModeDriftSpeedIntegral = ({ startSeconds, endSeconds }) => {
   const durationSeconds = Math.max(0, endSeconds - startSeconds);
 
   if (durationSeconds <= 0) {
@@ -325,13 +325,13 @@ const getCompetitiveModeDriftSpeedIntegral = ({ startSeconds, endSeconds }) => {
 
   for (let index = 0; index < sampleCount; index += 1) {
     const sampleTime = startSeconds + sampleDuration * (index + 0.5);
-    integral += getCompetitiveModeDriftSpeedRatio(sampleTime) * sampleDuration;
+    integral += getChallengeModeDriftSpeedRatio(sampleTime) * sampleDuration;
   }
 
   return integral;
 };
 
-const canApplyCompetitiveModeDrift = () =>
+const canApplyChallengeModeDrift = () =>
   game.phase === "ready" ||
   game.phase === "charging" ||
   game.phase === "jumping";
@@ -342,12 +342,12 @@ const getJumpElapsedFrame = ({ jump, now }) =>
 const getJumpTimeAtFrame = ({ jump, frame }) =>
   jump.startedAt + ((frame - jump.startFrame) / BASELINE_ANIMATION_FPS) * 1000;
 
-const getPredictedCompetitiveJumpCameraOffset = ({
+const getPredictedChallengeJumpCameraOffset = ({
   startedAt,
   startFrame,
   frame,
 }) => {
-  if (!isCompetitiveMode()) {
+  if (!isChallengeMode()) {
     return 0;
   }
 
@@ -360,7 +360,7 @@ const getPredictedCompetitiveJumpCameraOffset = ({
     return 0;
   }
 
-  const driftStartedAt = competitiveModeDrift.startedAt || startedAt;
+  const driftStartedAt = challengeModeDrift.startedAt || startedAt;
   const startSeconds = Math.max(0, (startedAt - driftStartedAt) / 1000);
   const endSeconds = Math.max(
     startSeconds,
@@ -369,16 +369,16 @@ const getPredictedCompetitiveJumpCameraOffset = ({
 
   return (
     stageSize.height *
-    getCompetitiveModeDriftSpeedIntegral({
+    getChallengeModeDriftSpeedIntegral({
       startSeconds,
       endSeconds,
     })
   );
 };
 
-const getCompetitiveModeDriftAppliedUntil = (now) => {
+const getChallengeModeDriftAppliedUntil = (now) => {
   if (
-    isCompetitiveMode() &&
+    isChallengeMode() &&
     game.phase === "jumping" &&
     (game.jump?.outcome === "top" || game.jump?.outcome === "low") &&
     typeof game.jump.freezeFrame === "number"
@@ -395,62 +395,62 @@ const getCompetitiveModeDriftAppliedUntil = (now) => {
   return now;
 };
 
-const applyCompetitiveModeDrift = (now) => {
-  if (!isCompetitiveMode() || !stageSize.height) {
+const applyChallengeModeDrift = (now) => {
+  if (!isChallengeMode() || !stageSize.height) {
     return;
   }
 
-  if (!competitiveModeDrift.startedAt || !competitiveModeDrift.lastAppliedAt) {
-    resetCompetitiveModeDrift(now);
+  if (!challengeModeDrift.startedAt || !challengeModeDrift.lastAppliedAt) {
+    resetChallengeModeDrift(now);
     return;
   }
 
-  if (!canApplyCompetitiveModeDrift()) {
-    competitiveModeDrift.lastAppliedAt = now;
+  if (!canApplyChallengeModeDrift()) {
+    challengeModeDrift.lastAppliedAt = now;
     return;
   }
 
-  const appliedUntil = getCompetitiveModeDriftAppliedUntil(now);
+  const appliedUntil = getChallengeModeDriftAppliedUntil(now);
 
-  if (appliedUntil <= competitiveModeDrift.lastAppliedAt) {
-    competitiveModeDrift.lastAppliedAt = now;
+  if (appliedUntil <= challengeModeDrift.lastAppliedAt) {
+    challengeModeDrift.lastAppliedAt = now;
     return;
   }
 
   const deltaSeconds = Math.max(
     0,
-    (appliedUntil - competitiveModeDrift.lastAppliedAt) / 1000,
+    (appliedUntil - challengeModeDrift.lastAppliedAt) / 1000,
   );
 
   if (deltaSeconds <= 0) {
-    competitiveModeDrift.lastAppliedAt = now;
+    challengeModeDrift.lastAppliedAt = now;
     return;
   }
 
   const previousElapsedSeconds = Math.max(
     0,
-    (competitiveModeDrift.lastAppliedAt - competitiveModeDrift.startedAt) /
+    (challengeModeDrift.lastAppliedAt - challengeModeDrift.startedAt) /
       1000,
   );
   const currentElapsedSeconds = Math.max(
     0,
-    (appliedUntil - competitiveModeDrift.startedAt) / 1000,
+    (appliedUntil - challengeModeDrift.startedAt) / 1000,
   );
-  const driftDistanceRatio = getCompetitiveModeDriftSpeedIntegral({
+  const driftDistanceRatio = getChallengeModeDriftSpeedIntegral({
     startSeconds: previousElapsedSeconds,
     endSeconds: currentElapsedSeconds,
   });
 
   cameraSurfaceY += stageSize.height * driftDistanceRatio;
-  competitiveModeDrift.lastAppliedAt = now;
+  challengeModeDrift.lastAppliedAt = now;
   syncPlatforms();
 };
 
-const isCompetitiveModeFallDeathPhase = () =>
+const isChallengeModeFallDeathPhase = () =>
   game.phase === "ready" || game.phase === "charging";
 
-const maybeTriggerCompetitiveModeFallDeath = (now) => {
-  if (!isCompetitiveMode() || !isCompetitiveModeFallDeathPhase()) {
+const maybeTriggerChallengeModeFallDeath = (now) => {
+  if (!isChallengeMode() || !isChallengeModeFallDeathPhase()) {
     return false;
   }
 
@@ -458,7 +458,7 @@ const maybeTriggerCompetitiveModeFallDeath = (now) => {
     return false;
   }
 
-  enterCompetitiveModeGameOver({ now });
+  enterChallengeModeGameOver({ now });
   return true;
 };
 
@@ -577,23 +577,23 @@ const setRandomPlatformWidth = (id) => {
 };
 
 const getTargetHorizontalDistanceMinRatio = () =>
-  isCompetitiveMode()
-    ? COMPETITIVE_TARGET_HORIZONTAL_DISTANCE_MIN_RATIO
+  isChallengeMode()
+    ? CHALLENGE_TARGET_HORIZONTAL_DISTANCE_MIN_RATIO
     : TARGET_HORIZONTAL_DISTANCE_MIN_RATIO;
 
 const getTargetHorizontalDistanceMaxRatio = () =>
-  isCompetitiveMode()
-    ? COMPETITIVE_TARGET_HORIZONTAL_DISTANCE_MAX_RATIO
+  isChallengeMode()
+    ? CHALLENGE_TARGET_HORIZONTAL_DISTANCE_MAX_RATIO
     : TARGET_HORIZONTAL_DISTANCE_MAX_RATIO;
 
 const getTargetVerticalGapMinRatio = () =>
-  isCompetitiveMode()
-    ? COMPETITIVE_TARGET_VERTICAL_GAP_MIN_RATIO
+  isChallengeMode()
+    ? CHALLENGE_TARGET_VERTICAL_GAP_MIN_RATIO
     : TARGET_VERTICAL_GAP_MIN_RATIO;
 
 const getTargetVerticalGapMaxRatio = () =>
-  isCompetitiveMode()
-    ? COMPETITIVE_TARGET_VERTICAL_GAP_MAX_RATIO
+  isChallengeMode()
+    ? CHALLENGE_TARGET_VERTICAL_GAP_MAX_RATIO
     : TARGET_VERTICAL_GAP_MAX_RATIO;
 
 const syncPlatformSizes = () => {
@@ -625,8 +625,8 @@ const getPlatformSurfaceBounds = () => ({
 
 const getCurrentSurfaceY = () => {
   const bounds = getPlatformSurfaceBounds();
-  const surfaceRatio = isCompetitiveMode()
-    ? COMPETITIVE_CURRENT_SURFACE_RATIO
+  const surfaceRatio = isChallengeMode()
+    ? CHALLENGE_CURRENT_SURFACE_RATIO
     : CURRENT_SURFACE_RATIO;
 
   return clamp(stageSize.height * surfaceRatio, bounds.min, bounds.max);
@@ -773,7 +773,7 @@ const resyncJumpCollisionFrame = () => {
   if (game.jump.outcome === "top") {
     const topCollisionFrame = findTopCollisionFrame(game.jump.jumpStateProps, {
       getCameraSurfaceOffsetAtFrame: (frame) =>
-        getPredictedCompetitiveJumpCameraOffset({
+        getPredictedChallengeJumpCameraOffset({
           startedAt: game.jump.startedAt,
           startFrame: game.jump.startFrame,
           frame,
@@ -978,41 +978,41 @@ const createJumpStateProps = ({ start, end, highAirY }) => {
 const CHARGE_CYCLE_ADVANCE_ITERATION_LIMIT = 64;
 const CHARGE_FULL_SEARCH_STEPS = 18;
 
-const getCompetitiveChargeCycleProgress = ({ cycleStartedAt, now }) => {
-  const driftStartedAt = competitiveModeDrift.startedAt || cycleStartedAt;
+const getChallengeChargeCycleProgress = ({ cycleStartedAt, now }) => {
+  const driftStartedAt = challengeModeDrift.startedAt || cycleStartedAt;
   const startSeconds = Math.max(0, (cycleStartedAt - driftStartedAt) / 1000);
   const endSeconds = Math.max(startSeconds, (now - driftStartedAt) / 1000);
-  const driftIntegral = getCompetitiveModeDriftSpeedIntegral({
+  const driftIntegral = getChallengeModeDriftSpeedIntegral({
     startSeconds,
     endSeconds,
   });
   const initialSpeedRatio = Math.max(
     0.0001,
-    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
+    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
   );
 
   return (
     ((driftIntegral / initialSpeedRatio) *
-      COMPETITIVE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER) /
+      CHALLENGE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER) /
     (CHARGE_MAX_MS / 1000)
   );
 };
 
 const getChargeCycleProgress = ({ cycleStartedAt, now }) => {
-  if (isCompetitiveMode()) {
-    return getCompetitiveChargeCycleProgress({ cycleStartedAt, now });
+  if (isChallengeMode()) {
+    return getChallengeChargeCycleProgress({ cycleStartedAt, now });
   }
 
   return Math.max(0, now - cycleStartedAt) / CHARGE_MAX_MS;
 };
 
-const findCompetitiveChargeFullAt = ({ cycleStartedAt, now }) => {
+const findChallengeChargeFullAt = ({ cycleStartedAt, now }) => {
   let low = cycleStartedAt;
   let high = now;
 
   for (let step = 0; step < CHARGE_FULL_SEARCH_STEPS; step += 1) {
     const midpoint = (low + high) / 2;
-    const progress = getCompetitiveChargeCycleProgress({
+    const progress = getChallengeChargeCycleProgress({
       cycleStartedAt,
       now: midpoint,
     });
@@ -1028,8 +1028,8 @@ const findCompetitiveChargeFullAt = ({ cycleStartedAt, now }) => {
 };
 
 const getChargeFullAt = ({ cycleStartedAt, now }) =>
-  isCompetitiveMode()
-    ? findCompetitiveChargeFullAt({ cycleStartedAt, now })
+  isChallengeMode()
+    ? findChallengeChargeFullAt({ cycleStartedAt, now })
     : cycleStartedAt + CHARGE_MAX_MS;
 
 const getChargePower = (now) => {
@@ -1153,7 +1153,7 @@ const findTopCollisionFrame = (
 };
 
 const getTopDeathDurationFrames = () =>
-  isCompetitiveMode() ? TOP_DEATH_IMPACT_HOLD_FRAMES : TOP_DEATH_DURATION_FRAMES;
+  isChallengeMode() ? TOP_DEATH_IMPACT_HOLD_FRAMES : TOP_DEATH_DURATION_FRAMES;
 
 const createJump = ({ now, chargePower }) => {
   const start = getPlatformAnchor(game.current);
@@ -1162,7 +1162,7 @@ const createJump = ({ now, chargePower }) => {
   const highAirY = start.surfaceY + getJumpLift(chargePower);
   const clearsTarget = highAirY >= target.surfaceY;
   const getCameraSurfaceOffsetAtFrame = (frame) =>
-    getPredictedCompetitiveJumpCameraOffset({
+    getPredictedChallengeJumpCameraOffset({
       startedAt: now,
       startFrame: JUMP_RELEASE_START_FRAME,
       frame,
@@ -1210,7 +1210,7 @@ const createJump = ({ now, chargePower }) => {
     chargePower,
     outcome,
     cameraMove:
-      outcome === "success" && !isCompetitiveMode()
+      outcome === "success" && !isChallengeMode()
         ? {
             startFrame: JUMP_CAMERA_START_FRAME,
             durationFrames: JUMP_CAMERA_DURATION_FRAMES,
@@ -1235,7 +1235,7 @@ const setClawdHitState = (isHit) => {
 
 const syncHud = () => {
   const chargeFeedback = getChargeFeedback(game.chargePower);
-  const chargeStyleFeedback = isCompetitiveMode() ? "low" : chargeFeedback;
+  const chargeStyleFeedback = isChallengeMode() ? "low" : chargeFeedback;
 
   scoreValue.textContent = `score: ${game.score}`;
   chargeFill.style.transform = `translateY(${(1 - game.chargePower) * 100}%)`;
@@ -1251,7 +1251,7 @@ const syncHud = () => {
   stage.classList.toggle("is-game-over", game.phase === "game-over");
 };
 
-const hideCompetitiveGameOver = () => {
+const hideChallengeGameOver = () => {
   if (
     document.activeElement instanceof HTMLElement &&
     gameOverModal.contains(document.activeElement)
@@ -1262,7 +1262,7 @@ const hideCompetitiveGameOver = () => {
   gameOverModal.hidden = true;
 };
 
-const showCompetitiveGameOver = () => {
+const showChallengeGameOver = () => {
   finalScoreValue.textContent = String(game.score);
   submitScoreButton.classList.remove("is-sent");
   renderRankList();
@@ -1276,11 +1276,11 @@ const showCompetitiveGameOver = () => {
   });
 };
 
-const enterCompetitiveModeGameOver = ({ now }) => {
+const enterChallengeModeGameOver = ({ now }) => {
   game.phase = "game-over";
   game.chargePower = 0;
   game.respawnStartedAt = 0;
-  resetCompetitiveModeDrift(now);
+  resetChallengeModeDrift(now);
   syncHud();
 
   if (!game.jump) {
@@ -1288,7 +1288,7 @@ const enterCompetitiveModeGameOver = ({ now }) => {
     setClawdHitState(true);
   }
 
-  showCompetitiveGameOver();
+  showChallengeGameOver();
 };
 
 const renderStaticPose = ({ anchor, scaleX = 1, scaleY = 1, armSwing = 0 }) => {
@@ -1531,13 +1531,13 @@ const getJumpScreenBodyBottomY = ({ jump, frame, cameraSurfaceOffset }) => {
   return motion.surfaceY - cameraSurfaceOffset;
 };
 
-const maybeTriggerCompetitiveJumpFallDeath = ({
+const maybeTriggerChallengeJumpFallDeath = ({
   now,
   jump,
   frame,
   cameraSurfaceOffset,
 }) => {
-  if (!isCompetitiveMode() || jump.outcome !== "success") {
+  if (!isChallengeMode() || jump.outcome !== "success") {
     return false;
   }
 
@@ -1552,7 +1552,7 @@ const maybeTriggerCompetitiveJumpFallDeath = ({
     collisionFrame: frame,
     jumpStateProps: jump.jumpStateProps,
   });
-  enterCompetitiveModeGameOver({ now });
+  enterChallengeModeGameOver({ now });
   return true;
 };
 
@@ -1565,7 +1565,7 @@ const finishJump = (now) => {
     const recycledPlatform = game.current;
 
     game.score += 1;
-    if (!isCompetitiveMode()) {
+    if (!isChallengeMode()) {
       cameraSurfaceY = getPlatformWorldAnchor(game.target).surfaceY;
     }
     game.platformQueue = [...game.platformQueue.slice(1), recycledPlatform];
@@ -1588,8 +1588,8 @@ const finishJump = (now) => {
   }
 
   if (game.jump.outcome === "top" || game.jump.outcome === "low") {
-    if (isCompetitiveMode()) {
-      enterCompetitiveModeGameOver({ now });
+    if (isChallengeMode()) {
+      enterChallengeModeGameOver({ now });
       return;
     }
 
@@ -1682,9 +1682,9 @@ const renderFrame = (now) => {
     return;
   }
 
-  applyCompetitiveModeDrift(now);
+  applyChallengeModeDrift(now);
 
-  if (maybeTriggerCompetitiveModeFallDeath(now)) {
+  if (maybeTriggerChallengeModeFallDeath(now)) {
     return;
   }
 
@@ -1725,7 +1725,7 @@ const renderFrame = (now) => {
         deathFrame: elapsedFrame - game.jump.freezeFrame,
         jumpStateProps: game.jump.jumpStateProps,
         cameraSurfaceOffset: freezeCameraSurfaceOffset,
-        fallEnabled: !isCompetitiveMode(),
+        fallEnabled: !isChallengeMode(),
       });
 
       if (elapsedFrame >= game.jump.resolveFrame) {
@@ -1785,7 +1785,7 @@ const renderFrame = (now) => {
     }
 
     if (
-      maybeTriggerCompetitiveJumpFallDeath({
+      maybeTriggerChallengeJumpFallDeath({
         now,
         jump: game.jump,
         frame,
@@ -1836,7 +1836,7 @@ const resetGame = ({
   respawn = false,
   now = performance.now(),
 } = {}) => {
-  hideCompetitiveGameOver();
+  hideChallengeGameOver();
   game.phase = respawn ? "respawning" : "ready";
   if (preservePlatforms) {
     syncQueueToLowestVisiblePlatform();
@@ -1850,7 +1850,7 @@ const resetGame = ({
   game.chargePower = 0;
   game.jump = null;
   game.respawnStartedAt = respawn ? now : 0;
-  resetCompetitiveModeDrift(now);
+  resetChallengeModeDrift(now);
   if (preservePlatforms) {
     syncPlatforms();
   } else {
@@ -1896,7 +1896,7 @@ const requestOverlayClose = () => {
 
   window.parent.postMessage(
     {
-      source: "happy-clawd-game",
+      source: "jumping-clawd-game",
       type: "close-game",
     },
     "*",
@@ -1932,7 +1932,7 @@ const releaseCharge = (now) => {
     return;
   }
 
-  applyCompetitiveModeDrift(now);
+  applyChallengeModeDrift(now);
   game.chargePower = getChargePower(now);
   game.phase = "jumping";
   game.jump = createJump({

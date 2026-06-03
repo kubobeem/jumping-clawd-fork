@@ -1,9 +1,9 @@
-export const OPEN_GAME_MESSAGE = 'happy-clawd:open-game';
-export const CLOSE_GAME_MESSAGE = 'happy-clawd:close-game';
-export const GET_GAME_STATE_MESSAGE = 'happy-clawd:get-game-state';
-export const SET_BACKDROP_BLUR_MESSAGE = 'happy-clawd:set-backdrop-blur';
+export const OPEN_GAME_MESSAGE = 'jumping-clawd:open-game';
+export const CLOSE_GAME_MESSAGE = 'jumping-clawd:close-game';
+export const GET_GAME_STATE_MESSAGE = 'jumping-clawd:get-game-state';
+export const SET_BACKDROP_BLUR_MESSAGE = 'jumping-clawd:set-backdrop-blur';
 
-export const GAME_MODES = ['casual', 'competitive'] as const;
+export const GAME_MODES = ['casual', 'challenge'] as const;
 export const DEFAULT_GAME_MODE = 'casual';
 
 export type GameMode = (typeof GAME_MODES)[number];

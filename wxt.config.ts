@@ -3,8 +3,8 @@ import { defineConfig } from 'wxt';
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   manifest: {
-    name: 'Happy Clawd',
-    description: 'Play Happy Clawd on the current page.',
+    name: 'Jumping Clawd',
+    description: 'Play Jumping Clawd on the current page.',
     permissions: ['activeTab', 'scripting', 'storage'],
     web_accessible_resources: [
       {
@@ -13,19 +13,19 @@ export default defineConfig({
       },
     ],
     commands: {
-      'happy-clawd-open-casual-game': {
+      'jumping-clawd-open-casual-game': {
         suggested_key: {
           default: 'Ctrl+Comma',
           mac: 'MacCtrl+Comma',
         },
-        description: 'Start Happy Clawd casual mode on the current page',
+        description: 'Start Jumping Clawd casual mode on the current page',
       },
-      'happy-clawd-open-competitive-game': {
+      'jumping-clawd-open-challenge-game': {
         suggested_key: {
           default: 'Ctrl+Period',
           mac: 'MacCtrl+Period',
         },
-        description: 'Start Happy Clawd competitive mode on the current page',
+        description: 'Start Jumping Clawd challenge mode on the current page',
       },
     },
   },

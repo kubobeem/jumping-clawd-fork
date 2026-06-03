@@ -28,7 +28,7 @@ if (!app) {
 }
 
 app.innerHTML = `
-  <main class="popup" aria-label="Happy Clawd">
+  <main class="popup" aria-label="Jumping Clawd">
     <header class="popup-header">
       <div class="mascot-mark" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 274 178" focusable="false">
@@ -44,8 +44,8 @@ app.innerHTML = `
         </svg>
       </div>
       <div class="brand-copy">
-        <h1>Happy Clawd</h1>
-        <p>在当前页面开始摸鱼</p>
+        <h1>Jumping Clawd</h1>
+        <p>在当前页面跳一跳</p>
       </div>
     </header>
 
@@ -59,7 +59,7 @@ app.innerHTML = `
         </span>
       </div>
       <div class="shortcut-row">
-        <span>竞技模式</span>
+        <span>挑战模式</span>
         <span class="key-combo" aria-label="Ctrl period">
           <kbd>Ctrl</kbd>
           <span class="shortcut-plus">+</span>
@@ -84,12 +84,12 @@ app.innerHTML = `
         休闲模式
       </button>
       <button
-        id="start-competitive-game"
+        id="start-challenge-game"
         class="game-button game-button--mode"
         type="button"
         aria-pressed="false"
       >
-        竞技模式
+        挑战模式
       </button>
       <button id="exit-game" class="game-button game-button--secondary game-button--exit" type="button">
         退出游戏
@@ -99,7 +99,7 @@ app.innerHTML = `
     <section class="setting" aria-labelledby="backdrop-blur-label">
       <div class="setting-header">
         <label id="backdrop-blur-label" for="backdrop-blur">
-          毛玻璃模糊
+          背景模糊
         </label>
         <output id="backdrop-blur-value" class="setting-value" for="backdrop-blur">
           ${DEFAULT_BACKDROP_BLUR_PX}px
@@ -122,8 +122,8 @@ app.innerHTML = `
 
 const casualModeButton =
   document.querySelector<HTMLButtonElement>('#start-casual-game');
-const competitiveModeButton =
-  document.querySelector<HTMLButtonElement>('#start-competitive-game');
+const challengeModeButton =
+  document.querySelector<HTMLButtonElement>('#start-challenge-game');
 const exitButton = document.querySelector<HTMLButtonElement>('#exit-game');
 const backdropBlurSlider =
   document.querySelector<HTMLInputElement>('#backdrop-blur');
@@ -133,7 +133,7 @@ const statusText = document.querySelector<HTMLParagraphElement>('#status');
 
 if (
   !casualModeButton ||
-  !competitiveModeButton ||
+  !challengeModeButton ||
   !exitButton ||
   !backdropBlurSlider ||
   !backdropBlurValue ||
@@ -146,12 +146,12 @@ type PendingAction = 'loading' | 'starting' | 'exiting' | null;
 
 const GAME_MODE_LABELS: Record<GameMode, string> = {
   casual: '休闲模式',
-  competitive: '竞技模式',
+  challenge: '挑战模式',
 };
 
 const modeButtons: Record<GameMode, HTMLButtonElement> = {
   casual: casualModeButton,
-  competitive: competitiveModeButton,
+  challenge: challengeModeButton,
 };
 
 const normalizeGameMode = (value: unknown): GameMode =>
@@ -217,7 +217,7 @@ const sendBackdropBlurToActiveTab = async (blurPx: number) => {
     });
   } catch (error) {
     if (!isMissingReceiverError(error)) {
-      console.warn('Failed to update Happy Clawd backdrop blur', error);
+      console.warn('Failed to update Jumping Clawd backdrop blur', error);
     }
   }
 };
@@ -227,7 +227,7 @@ const handleBackdropBlurInput = () => {
   const blurPx = setBackdropBlurControlValue(backdropBlurSlider.value);
 
   void saveStoredBackdropBlur(blurPx).catch((error) => {
-    console.warn('Failed to save Happy Clawd backdrop blur setting', error);
+    console.warn('Failed to save Jumping Clawd backdrop blur setting', error);
   });
   void sendBackdropBlurToActiveTab(blurPx);
 };
@@ -239,7 +239,7 @@ void getStoredBackdropBlur()
     }
   })
   .catch((error) => {
-    console.warn('Failed to load Happy Clawd backdrop blur setting', error);
+    console.warn('Failed to load Jumping Clawd backdrop blur setting', error);
   });
 
 const syncGameState = async () => {
@@ -252,7 +252,7 @@ const syncGameState = async () => {
     currentGameMode = isGameOpen ? normalizeGameMode(state.mode) : null;
     setStatus(isGameOpen ? getOpenStatus(currentGameMode) : '');
   } catch (error) {
-    console.warn('Failed to read Happy Clawd game state', error);
+    console.warn('Failed to read Jumping Clawd game state', error);
     isGameOpen = false;
     currentGameMode = null;
     setStatus('无法读取游戏状态');
@@ -278,7 +278,7 @@ const handleStartGame = async (mode: GameMode) => {
     await sendBackdropBlurToActiveTab(currentBackdropBlurPx);
     setStatus(getOpenStatus(currentGameMode));
   } catch (error) {
-    console.warn('Failed to open Happy Clawd game', error);
+    console.warn('Failed to open Jumping Clawd game', error);
     isGameOpen = false;
     currentGameMode = null;
     setStatus('当前页面无法打开游戏');
@@ -303,7 +303,7 @@ const handleExitGame = async () => {
     currentGameMode = state.isOpen ? normalizeGameMode(state.mode) : null;
     setStatus(state.state === 'already-closed' ? '游戏未打开' : '已退出');
   } catch (error) {
-    console.warn('Failed to close Happy Clawd game', error);
+    console.warn('Failed to close Jumping Clawd game', error);
     setStatus('当前页面无法退出游戏');
   } finally {
     pendingAction = null;

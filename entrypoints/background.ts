@@ -3,8 +3,8 @@ import { openGameInActiveTab } from '../src/extension/open-game';
 import type { GameMode } from '../src/extension/messages';
 
 const GAME_MODE_BY_COMMAND: Record<string, GameMode> = {
-  'happy-clawd-open-casual-game': 'casual',
-  'happy-clawd-open-competitive-game': 'competitive',
+  'jumping-clawd-open-casual-game': 'casual',
+  'jumping-clawd-open-challenge-game': 'challenge',
 };
 
 export default defineBackground(() => {
@@ -13,7 +13,7 @@ export default defineBackground(() => {
 
     if (gameMode) {
       void openGameInActiveTab(gameMode).catch((error) => {
-        console.warn('Failed to open Happy Clawd game from command', error);
+        console.warn('Failed to open Jumping Clawd game from command', error);
       });
     }
   });

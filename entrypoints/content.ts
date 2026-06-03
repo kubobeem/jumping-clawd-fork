@@ -18,7 +18,7 @@ import {
 } from '../src/extension/messages';
 
 const GAME_PAGE = '/game.html';
-const OVERLAY_ID = 'happy-clawd-game-overlay';
+const OVERLAY_ID = 'jumping-clawd-game-overlay';
 const PAGE_SURFACE_SEARCH_PARAM = 'surface';
 const GAME_MODE_SEARCH_PARAM = 'mode';
 const CONTRAST_SWITCH_LUMINANCE = 0.179;
@@ -71,7 +71,7 @@ const isSetBackdropBlurMessage = (
 
 const isGameFrameCloseMessage = (message: unknown) =>
   isObject(message) &&
-  message.source === 'happy-clawd-game' &&
+  message.source === 'jumping-clawd-game' &&
   message.type === 'close-game';
 
 const getShortcutGameMode = (event: KeyboardEvent): GameMode | null => {
@@ -89,7 +89,7 @@ const getShortcutGameMode = (event: KeyboardEvent): GameMode | null => {
   }
 
   if (event.key === '.' || event.code === 'Period') {
-    return 'competitive';
+    return 'challenge';
   }
 
   return null;
@@ -424,7 +424,7 @@ const getGamePageUrl = (
 
 const applyBackdropBlur = () => {
   overlayHost?.style.setProperty(
-    '--happy-clawd-backdrop-blur',
+    '--jumping-clawd-backdrop-blur',
     `${backdropBlurPx}px`,
   );
 };
@@ -440,7 +440,7 @@ const loadBackdropBlur = () => {
   backdropBlurLoad ??= getStoredBackdropBlur()
     .then(setBackdropBlur)
     .catch((error) => {
-      console.warn('Failed to load Happy Clawd backdrop blur setting', error);
+      console.warn('Failed to load Jumping Clawd backdrop blur setting', error);
       return backdropBlurPx;
     });
 
@@ -505,7 +505,7 @@ const closeGameOverlay = () => {
 const createOverlayHost = (gameMode: GameMode) => {
   const host = document.createElement('div');
   host.id = OVERLAY_ID;
-  host.style.setProperty('--happy-clawd-backdrop-blur', `${backdropBlurPx}px`);
+  host.style.setProperty('--jumping-clawd-backdrop-blur', `${backdropBlurPx}px`);
   setImportantStyle(host, 'position', 'fixed');
   setImportantStyle(host, 'inset', '0');
   setImportantStyle(host, 'width', '100vw');
@@ -536,8 +536,8 @@ const createOverlayHost = (gameMode: GameMode) => {
         background:
           linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
           rgba(255, 255, 255, 0.12);
-        -webkit-backdrop-filter: blur(var(--happy-clawd-backdrop-blur, 2px)) saturate(1.1);
-        backdrop-filter: blur(var(--happy-clawd-backdrop-blur, 2px)) saturate(1.1);
+        -webkit-backdrop-filter: blur(var(--jumping-clawd-backdrop-blur, 2px)) saturate(1.1);
+        backdrop-filter: blur(var(--jumping-clawd-backdrop-blur, 2px)) saturate(1.1);
       }
 
       iframe {
@@ -553,14 +553,14 @@ const createOverlayHost = (gameMode: GameMode) => {
     </style>
     <div class="overlay">
       <div class="backdrop"></div>
-      <iframe title="Happy Clawd game" allowtransparency="true"></iframe>
+      <iframe title="Jumping Clawd game" allowtransparency="true"></iframe>
     </div>
   `;
 
   const iframe = shadow.querySelector<HTMLIFrameElement>('iframe');
 
   if (!iframe) {
-    throw new Error('Failed to create Happy Clawd overlay');
+    throw new Error('Failed to create Jumping Clawd overlay');
   }
 
   iframe.src = getGamePageUrl(getPageSurfaceTheme(), gameMode);

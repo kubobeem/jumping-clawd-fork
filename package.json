@@ -1,6 +1,6 @@
 {
-  "name": "happy-clawd",
-  "description": "Happy Clawd browser extension",
+  "name": "jumping-clawd",
+  "description": "Jumping Clawd browser extension",
   "private": true,
   "version": "0.0.0",
   "type": "module",

@@ -68,7 +68,7 @@ const assertContentScriptIsBundled = () => {
   );
 
   if (!contentScript) {
-    throw new Error('Happy Clawd content script is missing from the manifest');
+    throw new Error('Jumping Clawd content script is missing from the manifest');
   }
 };
 
