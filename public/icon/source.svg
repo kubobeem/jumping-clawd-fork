@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
   <title id="title">Jumping Clawd icon</title>
-  <desc id="desc">The Clawd mascot jumping upward with diagonal down-swept arms and four slim connected legs.</desc>
+  <desc id="desc">The Clawd mascot jumping with down-swept arms and four short connected legs.</desc>
 
-  <path d="M22 48L35 66L14 97L1 79Z" fill="#DA7756" />
-  <path d="M106 48L127 79L114 97L93 66Z" fill="#DA7756" />
-  <path d="M18 1H110V76H101V127H91V76H77V127H67V76H59V127H49V76H35V127H25V76H18V1Z" fill="#DA7756" />
-  <path d="M34 30H43V47H34V30Z" fill="#000000" />
-  <path d="M85 30H94V47H85V30Z" fill="#000000" />
+  <path d="M0.81 52.25L16.14 40.27L25.71 52.51L10.37 64.49Z" fill="#DA7756" />
+  <path d="M111.61 40.27L127.14 52.4L117.58 64.64L102.05 52.51Z" fill="#DA7756" />
+  <path d="M17 22H111V84.72H102.52V98.55H95.07V84.72H87.34V98.55H79.68V84.72H48.47V98.55H40.74V84.72H32.65V98.55H25.09V84.72H17V22Z" fill="#DA7756" />
+  <path d="M32.87 38.62H40.84V53.66H32.87V38.62Z" fill="#000000" />
+  <path d="M87.16 38.62H95.13V53.66H87.16V38.62Z" fill="#000000" />
 </svg>
