@@ -366,26 +366,6 @@ body {
   text-align: right;
 }
 
-.game-over__submit-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(54px, auto) 70px;
-  align-items: center;
-  gap: 0;
-  padding: 0 0 6px;
-  border-bottom: 1px solid #000000;
-}
-
-.game-over__submit-head span {
-  color: #000000;
-  font-size: 12px;
-  font-weight: 780;
-  line-height: 1.2;
-}
-
-.game-over__submit-head span:nth-child(2) {
-  text-align: center;
-}
-
 .game-over__submit-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(54px, auto) 70px;

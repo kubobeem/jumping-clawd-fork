@@ -17,10 +17,6 @@ const GAME_OVER_MODAL_CONTENT = `
       <ol class="game-over__rank-list" data-rank-list></ol>
     </section>
     <form class="game-over__submit" data-score-form>
-      <div class="game-over__submit-head" aria-hidden="true">
-        <span>\u540D\u5B57</span>
-        <span>\u5F97\u5206</span>
-      </div>
       <div class="game-over__submit-body">
         <label class="game-over__field">
           <input
@@ -29,7 +25,7 @@ const GAME_OVER_MODAL_CONTENT = `
             maxlength="24"
             autocomplete="off"
             inputmode="text"
-            aria-label="\u540D\u5B57"
+            aria-label="\u8F93\u5165\u4F60\u7684\u5927\u540D"
           />
         </label>
         <strong class="game-over__final-score" data-final-score>0</strong>
