@@ -13,12 +13,19 @@ export default defineConfig({
       },
     ],
     commands: {
-      'happy-clawd-open-game': {
+      'happy-clawd-open-casual-game': {
         suggested_key: {
-          default: 'Ctrl+H',
-          mac: 'MacCtrl+H',
+          default: 'Ctrl+Comma',
+          mac: 'MacCtrl+Comma',
         },
-        description: 'Start Happy Clawd on the current page',
+        description: 'Start Happy Clawd casual mode on the current page',
+      },
+      'happy-clawd-open-competitive-game': {
+        suggested_key: {
+          default: 'Ctrl+Period',
+          mac: 'MacCtrl+Period',
+        },
+        description: 'Start Happy Clawd competitive mode on the current page',
       },
     },
   },

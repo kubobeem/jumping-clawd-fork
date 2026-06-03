@@ -51,11 +51,19 @@ app.innerHTML = `
 
     <section class="shortcut-panel" aria-label="快捷键">
       <div class="shortcut-row">
-        <span>打开游戏</span>
-        <span class="key-combo" aria-label="Ctrl H">
+        <span>休闲模式</span>
+        <span class="key-combo" aria-label="Ctrl comma">
           <kbd>Ctrl</kbd>
           <span class="shortcut-plus">+</span>
-          <kbd>H</kbd>
+          <kbd>,</kbd>
+        </span>
+      </div>
+      <div class="shortcut-row">
+        <span>竞技模式</span>
+        <span class="key-combo" aria-label="Ctrl period">
+          <kbd>Ctrl</kbd>
+          <span class="shortcut-plus">+</span>
+          <kbd>.</kbd>
         </span>
       </div>
       <div class="shortcut-row">

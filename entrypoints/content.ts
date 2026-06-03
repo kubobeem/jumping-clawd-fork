@@ -74,12 +74,26 @@ const isGameFrameCloseMessage = (message: unknown) =>
   message.source === 'happy-clawd-game' &&
   message.type === 'close-game';
 
-const isOpenGameShortcut = (event: KeyboardEvent) =>
-  event.ctrlKey &&
-  !event.altKey &&
-  !event.metaKey &&
-  !event.shiftKey &&
-  event.key.toLowerCase() === 'h';
+const getShortcutGameMode = (event: KeyboardEvent): GameMode | null => {
+  if (
+    !event.ctrlKey ||
+    event.altKey ||
+    event.metaKey ||
+    event.shiftKey
+  ) {
+    return null;
+  }
+
+  if (event.key === ',' || event.code === 'Comma') {
+    return 'casual';
+  }
+
+  if (event.key === '.' || event.code === 'Period') {
+    return 'competitive';
+  }
+
+  return null;
+};
 
 const setImportantStyle = (
   element: HTMLElement,
@@ -589,15 +603,12 @@ export default defineContentScript({
     void loadBackdropBlur();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (isOpenGameShortcut(event)) {
+      const shortcutGameMode = getShortcutGameMode(event);
+
+      if (shortcutGameMode) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (overlayHost?.isConnected) {
-          focusGameFrame();
-          return;
-        }
-
-        void openGameOverlay();
+        void openGameOverlay(shortcutGameMode);
         return;
       }
 
