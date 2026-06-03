@@ -13,6 +13,7 @@ import {
   CHARGE_COLOR_LOW,
   CHARGE_COLOR_PERFECT,
   CHARGE_COLOR_TOP,
+  CHARGE_FULL_HOLD_MS,
   CHARGE_MAX_LIFT_RATIO,
   CHARGE_MAX_MS,
   CHARGE_METER_GAP_RATIO,
@@ -27,7 +28,9 @@ import {
   CLAWD_JUMP_TIMING,
   CLAWD_SCENE_SCALE,
   CLAWD_TOP_PADDING_RATIO,
-  COMPETITIVE_MODE_CHARGE_COLOR,
+  COMPETITIVE_CURRENT_SURFACE_RATIO,
+  COMPETITIVE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER,
+  COMPETITIVE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO,
   COMPETITIVE_MODE_DRIFT_ACCELERATION_RATIO,
   COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
   COMPETITIVE_MODE_DRIFT_MAX_SPEED_RATIO,
@@ -191,6 +194,7 @@ const game = {
   platformQueue: [...platformIds],
   score: 0,
   chargeStartedAt: 0,
+  chargeCycleStartedAt: 0,
   chargePower: 0,
   jump: null,
   respawnStartedAt: 0,
@@ -290,13 +294,40 @@ const resetCompetitiveModeDrift = (now) => {
   competitiveModeDrift.lastAppliedAt = now;
 };
 
-const getCompetitiveModeDriftSpeedRatio = (elapsedSeconds) =>
-  clamp(
-    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO +
-      COMPETITIVE_MODE_DRIFT_ACCELERATION_RATIO * elapsedSeconds,
+const getCompetitiveModeDriftSpeedRatio = (elapsedSeconds) => {
+  const elapsed = Math.max(0, elapsedSeconds);
+  const maxSpeedRatio = Math.max(
     COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
     COMPETITIVE_MODE_DRIFT_MAX_SPEED_RATIO,
   );
+
+  return clamp(
+    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO +
+      COMPETITIVE_MODE_DRIFT_ACCELERATION_RATIO * elapsed +
+      COMPETITIVE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO * elapsed * elapsed,
+    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
+    maxSpeedRatio,
+  );
+};
+
+const getCompetitiveModeDriftSpeedIntegral = ({ startSeconds, endSeconds }) => {
+  const durationSeconds = Math.max(0, endSeconds - startSeconds);
+
+  if (durationSeconds <= 0) {
+    return 0;
+  }
+
+  const sampleCount = 12;
+  const sampleDuration = durationSeconds / sampleCount;
+  let integral = 0;
+
+  for (let index = 0; index < sampleCount; index += 1) {
+    const sampleTime = startSeconds + sampleDuration * (index + 0.5);
+    integral += getCompetitiveModeDriftSpeedRatio(sampleTime) * sampleDuration;
+  }
+
+  return integral;
+};
 
 const canApplyCompetitiveModeDrift = () =>
   game.phase === "ready" ||
@@ -336,12 +367,12 @@ const applyCompetitiveModeDrift = (now) => {
     0,
     (now - competitiveModeDrift.startedAt) / 1000,
   );
-  const averageSpeedRatio =
-    (getCompetitiveModeDriftSpeedRatio(previousElapsedSeconds) +
-      getCompetitiveModeDriftSpeedRatio(currentElapsedSeconds)) /
-    2;
+  const driftDistanceRatio = getCompetitiveModeDriftSpeedIntegral({
+    startSeconds: previousElapsedSeconds,
+    endSeconds: currentElapsedSeconds,
+  });
 
-  cameraSurfaceY += stageSize.height * averageSpeedRatio * deltaSeconds;
+  cameraSurfaceY += stageSize.height * driftDistanceRatio;
   competitiveModeDrift.lastAppliedAt = now;
   syncPlatforms();
 };
@@ -525,7 +556,11 @@ const getPlatformSurfaceBounds = () => ({
 
 const getCurrentSurfaceY = () => {
   const bounds = getPlatformSurfaceBounds();
-  return clamp(stageSize.height * CURRENT_SURFACE_RATIO, bounds.min, bounds.max);
+  const surfaceRatio = isCompetitiveMode()
+    ? COMPETITIVE_CURRENT_SURFACE_RATIO
+    : CURRENT_SURFACE_RATIO;
+
+  return clamp(stageSize.height * surfaceRatio, bounds.min, bounds.max);
 };
 
 const getScreenSurfaceY = (worldSurfaceY) =>
@@ -858,10 +893,91 @@ const createJumpStateProps = ({ start, end, highAirY }) => {
   };
 };
 
-const getChargePower = (now) => {
-  const elapsed = Math.max(0, now - game.chargeStartedAt);
+const CHARGE_CYCLE_ADVANCE_ITERATION_LIMIT = 64;
+const CHARGE_FULL_SEARCH_STEPS = 18;
 
-  return (elapsed % CHARGE_MAX_MS) / CHARGE_MAX_MS;
+const getCompetitiveChargeCycleProgress = ({ cycleStartedAt, now }) => {
+  const driftStartedAt = competitiveModeDrift.startedAt || cycleStartedAt;
+  const startSeconds = Math.max(0, (cycleStartedAt - driftStartedAt) / 1000);
+  const endSeconds = Math.max(startSeconds, (now - driftStartedAt) / 1000);
+  const driftIntegral = getCompetitiveModeDriftSpeedIntegral({
+    startSeconds,
+    endSeconds,
+  });
+  const initialSpeedRatio = Math.max(
+    0.0001,
+    COMPETITIVE_MODE_DRIFT_INITIAL_SPEED_RATIO,
+  );
+
+  return (
+    ((driftIntegral / initialSpeedRatio) *
+      COMPETITIVE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER) /
+    (CHARGE_MAX_MS / 1000)
+  );
+};
+
+const getChargeCycleProgress = ({ cycleStartedAt, now }) => {
+  if (isCompetitiveMode()) {
+    return getCompetitiveChargeCycleProgress({ cycleStartedAt, now });
+  }
+
+  return Math.max(0, now - cycleStartedAt) / CHARGE_MAX_MS;
+};
+
+const findCompetitiveChargeFullAt = ({ cycleStartedAt, now }) => {
+  let low = cycleStartedAt;
+  let high = now;
+
+  for (let step = 0; step < CHARGE_FULL_SEARCH_STEPS; step += 1) {
+    const midpoint = (low + high) / 2;
+    const progress = getCompetitiveChargeCycleProgress({
+      cycleStartedAt,
+      now: midpoint,
+    });
+
+    if (progress >= 1) {
+      high = midpoint;
+    } else {
+      low = midpoint;
+    }
+  }
+
+  return high;
+};
+
+const getChargeFullAt = ({ cycleStartedAt, now }) =>
+  isCompetitiveMode()
+    ? findCompetitiveChargeFullAt({ cycleStartedAt, now })
+    : cycleStartedAt + CHARGE_MAX_MS;
+
+const getChargePower = (now) => {
+  let cycleStartedAt = game.chargeCycleStartedAt || game.chargeStartedAt || now;
+
+  for (
+    let iteration = 0;
+    iteration < CHARGE_CYCLE_ADVANCE_ITERATION_LIMIT;
+    iteration += 1
+  ) {
+    const progress = getChargeCycleProgress({ cycleStartedAt, now });
+
+    if (progress < 1) {
+      game.chargeCycleStartedAt = cycleStartedAt;
+      return clamp01(progress);
+    }
+
+    const fullAt = getChargeFullAt({ cycleStartedAt, now });
+    const holdEndsAt = fullAt + CHARGE_FULL_HOLD_MS;
+
+    if (now < holdEndsAt) {
+      game.chargeCycleStartedAt = cycleStartedAt;
+      return 1;
+    }
+
+    cycleStartedAt = holdEndsAt;
+  }
+
+  game.chargeCycleStartedAt = now;
+  return 0;
 };
 
 const getChargeFeedback = (power) => {
@@ -1042,19 +1158,15 @@ const setClawdHitState = (isHit) => {
 
 const syncHud = () => {
   const chargeFeedback = getChargeFeedback(game.chargePower);
+  const chargeStyleFeedback = isCompetitiveMode() ? "low" : chargeFeedback;
 
   scoreValue.textContent = `score: ${game.score}`;
   chargeFill.style.transform = `translateY(${(1 - game.chargePower) * 100}%)`;
   chargeFill.style.setProperty(
     "--charge-color",
-    isCompetitiveMode()
-      ? COMPETITIVE_MODE_CHARGE_COLOR
-      : getChargeColor(chargeFeedback),
+    getChargeColor(chargeStyleFeedback),
   );
-  chargeFill.classList.toggle(
-    "is-low",
-    !isCompetitiveMode() && chargeFeedback === "low",
-  );
+  chargeFill.classList.toggle("is-low", chargeStyleFeedback === "low");
   stage.classList.toggle("is-dead", game.phase === "dead");
   stage.classList.toggle("is-charging", game.phase === "charging");
   stage.classList.toggle("is-jumping", game.phase === "jumping");
@@ -1598,6 +1710,7 @@ const resetGame = ({
   }
   game.score = 0;
   game.chargeStartedAt = 0;
+  game.chargeCycleStartedAt = 0;
   game.chargePower = 0;
   game.jump = null;
   game.respawnStartedAt = respawn ? now : 0;
@@ -1672,6 +1785,7 @@ const beginCharge = (now) => {
 
   game.phase = "charging";
   game.chargeStartedAt = now;
+  game.chargeCycleStartedAt = now;
   game.chargePower = 0;
   syncHud();
   renderChargingPose(now);
@@ -1730,6 +1844,8 @@ window.addEventListener("blur", () => {
   }
 
   game.phase = "ready";
+  game.chargeStartedAt = 0;
+  game.chargeCycleStartedAt = 0;
   game.chargePower = 0;
   syncHud();
 });

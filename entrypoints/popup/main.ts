@@ -45,7 +45,7 @@ app.innerHTML = `
       </div>
       <div class="brand-copy">
         <h1>Happy Clawd</h1>
-        <p>在当前页面开始游戏</p>
+        <p>在当前页面开始摸鱼</p>
       </div>
     </header>
 
@@ -73,7 +73,7 @@ app.innerHTML = `
         type="button"
         aria-pressed="false"
       >
-        摸鱼模式
+        休闲模式
       </button>
       <button
         id="start-competitive-game"
@@ -137,7 +137,7 @@ if (
 type PendingAction = 'loading' | 'starting' | 'exiting' | null;
 
 const GAME_MODE_LABELS: Record<GameMode, string> = {
-  casual: '摸鱼模式',
+  casual: '休闲模式',
   competitive: '竞技模式',
 };
 
