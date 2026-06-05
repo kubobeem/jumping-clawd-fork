@@ -233,6 +233,7 @@ const game = {
   respawnStartedAt: 0,
 };
 
+const RANK_VISIBLE_ROWS = 5;
 const RANK_ENTRY_LIMIT = 10;
 const PLAYER_NAME_STORAGE_KEY = "jumping-clawd:player-name";
 
@@ -273,6 +274,22 @@ const renderRankStatus = (message) => {
   rankList.append(row);
 };
 
+const updateRankFade = () => {
+  const rows = rankList.querySelectorAll(".game-over__rank-row:not(.is-status)");
+  if (rows.length <= RANK_VISIBLE_ROWS) {
+    rankList.classList.remove("can-scroll-up", "can-scroll-down");
+    return;
+  }
+
+  const atTop = rankList.scrollTop < 2;
+  const atBottom =
+    rankList.scrollTop + rankList.clientHeight >=
+    rankList.scrollHeight - 2;
+
+  rankList.classList.toggle("can-scroll-up", !atTop);
+  rankList.classList.toggle("can-scroll-down", !atBottom);
+};
+
 const renderRankList = () => {
   rankList.textContent = "";
 
@@ -309,13 +326,16 @@ const renderRankList = () => {
     row.append(rank, name, score);
     rankList.append(row);
   });
+
+  updateRankFade();
 };
 
 const updateScoreSubmitState = () => {
   submitScoreButton.disabled =
     rankState.isSubmitting ||
     rankState.hasSubmittedCurrentScore ||
-    getPlayerName().length === 0;
+    getPlayerName().length === 0 ||
+    game.score === 0;
 };
 
 const loadRankEntries = async () => {
@@ -385,7 +405,7 @@ const submitPlayerScore = async () => {
       localStorage.setItem(PLAYER_NAME_STORAGE_KEY, name);
       renderRankList();
       submitScoreButton.classList.add("is-sent");
-      submitScoreButton.textContent = "已上榜";
+      submitScoreButton.textContent = "已有更高分";
       return;
     }
 
@@ -2393,6 +2413,8 @@ scoreForm.addEventListener("submit", (event) => {
   event.preventDefault();
   void submitPlayerScore();
 });
+
+rankList.addEventListener("scroll", updateRankFade);
 
 playerNameInput.addEventListener("input", () => {
   if (rankState.hasSubmittedCurrentScore) {

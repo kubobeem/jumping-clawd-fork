@@ -339,6 +339,13 @@ body {
   padding: 0;
   border: 2px solid #000000;
   list-style: none;
+  max-height: calc(32px * 5.5 + 4px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.game-over__rank-list::-webkit-scrollbar {
+  display: none;
 }
 
 .game-over__rank-row {
@@ -364,6 +371,49 @@ body {
 .game-over__rank-row.is-player {
   background: #000000;
   color: #ffffff;
+}
+
+.game-over__rank-list.can-scroll-down {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 85%,
+    rgba(0, 0, 0, 0.15)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 85%,
+    rgba(0, 0, 0, 0.15)
+  );
+}
+
+.game-over__rank-list.can-scroll-up {
+  -webkit-mask-image: linear-gradient(
+    to top,
+    black 85%,
+    rgba(0, 0, 0, 0.15)
+  );
+  mask-image: linear-gradient(
+    to top,
+    black 85%,
+    rgba(0, 0, 0, 0.15)
+  );
+}
+
+.game-over__rank-list.can-scroll-up.can-scroll-down {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15),
+    black 15%,
+    black 85%,
+    rgba(0, 0, 0, 0.15)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15),
+    black 15%,
+    black 85%,
+    rgba(0, 0, 0, 0.15)
+  );
 }
 
 .game-over__rank-row.is-status {
