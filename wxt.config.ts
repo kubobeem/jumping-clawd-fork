@@ -12,7 +12,7 @@ export default defineConfig({
   manifest: {
     name: 'Jumping Clawd',
     short_name: 'Clawd Jump',
-    description: 'Play Jumping Clawd on webpages or in a standalone tab.',
+    description: 'Jump while you wait — 网页等待时来局跳一跳',
     action: {
       default_title: 'Jumping Clawd',
       default_icon: extensionIcon,
