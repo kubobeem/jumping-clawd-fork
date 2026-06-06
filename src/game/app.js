@@ -28,10 +28,7 @@ import {
   CLAWD_TOP_PADDING_RATIO,
   CHALLENGE_CURRENT_SURFACE_RATIO,
   CHALLENGE_MODE_CHARGE_INITIAL_SPEED_MULTIPLIER,
-  CHALLENGE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO,
-  CHALLENGE_MODE_DRIFT_ACCELERATION_RATIO,
   CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
-  CHALLENGE_MODE_DRIFT_MAX_SPEED_RATIO,
   CHALLENGE_TARGET_HORIZONTAL_DISTANCE_MAX_RATIO,
   CHALLENGE_TARGET_HORIZONTAL_DISTANCE_MIN_RATIO,
   CHALLENGE_TARGET_VERTICAL_GAP_MAX_RATIO,
@@ -464,39 +461,10 @@ const resetChallengeModeDrift = (now) => {
   challengeModeDrift.lastAppliedAt = now;
 };
 
-const getChallengeModeDriftSpeedRatio = (elapsedSeconds) => {
-  const elapsed = Math.max(0, elapsedSeconds);
-  const maxSpeedRatio = Math.max(
-    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
-    CHALLENGE_MODE_DRIFT_MAX_SPEED_RATIO,
-  );
-
-  return clamp(
-    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO +
-      CHALLENGE_MODE_DRIFT_ACCELERATION_RATIO * elapsed +
-      CHALLENGE_MODE_DRIFT_ACCELERATION_GROWTH_RATIO * elapsed * elapsed,
-    CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO,
-    maxSpeedRatio,
-  );
-};
-
 const getChallengeModeDriftSpeedIntegral = ({ startSeconds, endSeconds }) => {
   const durationSeconds = Math.max(0, endSeconds - startSeconds);
 
-  if (durationSeconds <= 0) {
-    return 0;
-  }
-
-  const sampleCount = 12;
-  const sampleDuration = durationSeconds / sampleCount;
-  let integral = 0;
-
-  for (let index = 0; index < sampleCount; index += 1) {
-    const sampleTime = startSeconds + sampleDuration * (index + 0.5);
-    integral += getChallengeModeDriftSpeedRatio(sampleTime) * sampleDuration;
-  }
-
-  return integral;
+  return CHALLENGE_MODE_DRIFT_INITIAL_SPEED_RATIO * durationSeconds;
 };
 
 const canApplyChallengeModeDrift = () =>
