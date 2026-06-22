@@ -10,6 +10,7 @@ const extensionIcon = {
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   manifest: {
+    default_locale: 'en',
     name: '__MSG_extensionName__',
     short_name: '__MSG_extensionShortName__',
     description: '__MSG_extensionDescription__',
