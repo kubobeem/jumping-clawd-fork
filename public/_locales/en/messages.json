@@ -133,5 +133,38 @@
   },
   "exit": {
     "message": "Exit"
+  },
+  "mascotTitle": {
+    "message": "Clawd Mascot"
+  },
+  "mascotToggle": {
+    "message": "ON / OFF"
+  },
+  "mascotMode": {
+    "message": "Mode"
+  },
+  "mascotModeRandom": {
+    "message": "Auto"
+  },
+  "mascotModeWeb": {
+    "message": "Web"
+  },
+  "mascotModeUI": {
+    "message": "Browser"
+  },
+  "mascotSize": {
+    "message": "Size"
+  },
+  "mascotQuiet": {
+    "message": "Quiet Mode"
+  },
+  "mascotPowerSave": {
+    "message": "Power Save"
+  },
+  "mascotClickThrough": {
+    "message": "Click-Through"
+  },
+  "mascotSatiety": {
+    "message": "Satiety"
   }
 }

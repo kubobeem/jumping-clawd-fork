@@ -19,6 +19,20 @@ import {
   SET_BACKDROP_BLUR_MESSAGE,
   isGameMode,
 } from '../../src/extension/messages';
+import {
+  type MascotMode,
+  type MascotSettings,
+  DEFAULT_MASCOT_SETTINGS,
+  MASCOT_SIZE_MIN,
+  MASCOT_SIZE_MAX,
+  MASCOT_STORAGE_KEY,
+} from '../../src/mascot/types';
+import {
+  openMascotInActiveTab,
+  closeMascotInActiveTab,
+  getMascotStateInActiveTab,
+  updateMascotSettingsInActiveTab,
+} from '../../src/extension/open-mascot';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -117,6 +131,59 @@ app.innerHTML = `
       />
     </section>
 
+    <!-- Mascot Section -->
+    <section class="mascot-panel" id="mascot-panel" aria-labelledby="mascot-panel-title">
+      <div class="mascot-panel-header">
+        <span id="mascot-panel-title"></span>
+        <button id="mascot-toggle" class="mascot-toggle" type="button" aria-pressed="false"></button>
+      </div>
+      <div class="mascot-settings" id="mascot-settings" hidden>
+        <div class="mascot-setting-row">
+          <span id="mascot-mode-label"></span>
+          <div class="mascot-mode-buttons" role="radiogroup" id="mascot-mode-group">
+            <button class="mascot-mode-btn" data-mode="random" type="button" role="radio" aria-checked="true"></button>
+            <button class="mascot-mode-btn" data-mode="web-page" type="button" role="radio" aria-checked="false"></button>
+            <button class="mascot-mode-btn" data-mode="browser-ui" type="button" role="radio" aria-checked="false"></button>
+          </div>
+        </div>
+        <div class="setting">
+          <div class="setting-header">
+            <label id="mascot-size-label" for="mascot-size"></label>
+            <output id="mascot-size-value" class="setting-value" for="mascot-size">${DEFAULT_MASCOT_SETTINGS.size}px</output>
+          </div>
+          <input
+            id="mascot-size"
+            class="slider"
+            type="range"
+            min="${MASCOT_SIZE_MIN}"
+            max="${MASCOT_SIZE_MAX}"
+            value="${DEFAULT_MASCOT_SETTINGS.size}"
+          />
+        </div>
+        <div class="mascot-toggles">
+          <label class="mascot-toggle-row">
+            <span id="mascot-quiet-label"></span>
+            <input id="mascot-quiet" class="mascot-checkbox" type="checkbox" />
+          </label>
+          <label class="mascot-toggle-row">
+            <span id="mascot-powersave-label"></span>
+            <input id="mascot-powersave" class="mascot-checkbox" type="checkbox" checked />
+          </label>
+          <label class="mascot-toggle-row">
+            <span id="mascot-clickthrough-label"></span>
+            <input id="mascot-clickthrough" class="mascot-checkbox" type="checkbox" />
+          </label>
+        </div>
+        <div class="mascot-panel-satiety">
+          <span id="mascot-satiety-label"></span>
+          <div class="mascot-satiety-bar" id="mascot-satiety-bar">
+            <div class="mascot-satiety-fill" id="mascot-satiety-fill" style="width:100%"></div>
+          </div>
+          <span id="mascot-satiety-pct" class="setting-value">100%</span>
+        </div>
+      </div>
+    </section>
+
     <p id="status" class="status" role="status" aria-live="polite"></p>
   </main>
 `;
@@ -143,7 +210,7 @@ if (
   throw new Error('Missing popup controls');
 }
 
-type PendingAction = 'loading' | 'starting' | 'exiting' | null;
+type PendingAction = 'loading' | 'starting' | 'exiting' | 'mascot-loading' | null;
 
 const modeButtons: Record<GameMode, HTMLButtonElement> = {
   casual: casualModeButton,
@@ -185,7 +252,27 @@ const applyPopupTranslations = () => {
     'start-challenge-game': 'challengeMode',
     'exit-game': 'exitGame',
     'backdrop-blur-label': 'backgroundBlur',
+    'mascot-panel-title': 'mascotTitle',
+    'mascot-mode-label': 'mascotMode',
+    'mascot-size-label': 'mascotSize',
+    'mascot-quiet-label': 'mascotQuiet',
+    'mascot-powersave-label': 'mascotPowerSave',
+    'mascot-clickthrough-label': 'mascotClickThrough',
+    'mascot-satiety-label': 'mascotSatiety',
   };
+
+  // Mascot toggle button text
+  if (mascotToggle) mascotToggle.textContent = t('mascotToggle');
+
+  // Mascot mode buttons
+  mascotModeButtons.forEach((btn) => {
+    const mode = btn.dataset.mode;
+    let msgKey = '';
+    if (mode === 'random') msgKey = 'mascotModeRandom';
+    else if (mode === 'web-page') msgKey = 'mascotModeWeb';
+    else if (mode === 'browser-ui') msgKey = 'mascotModeUI';
+    if (msgKey) btn.textContent = t(msgKey);
+  });
 
   Object.entries(els).forEach(([id, msgKey]) => {
     const el = document.querySelector<HTMLElement>(`#${id}`);
@@ -245,6 +332,171 @@ const sendBackdropBlurToActiveTab = async (blurPx: number) => {
     if (!isMissingReceiverError(error)) {
       console.warn('Failed to update Jumping Clawd backdrop blur', error);
     }
+  }
+};
+
+// ── Mascot state ──
+let isMascotOpen = false;
+let currentMascotMode: MascotMode = 'random';
+let currentMascotSatiety = 100;
+let mascotSettings: MascotSettings = { ...DEFAULT_MASCOT_SETTINGS };
+const MASCOT_PENDING = 'mascot-loading' as const;
+
+const mascotToggle = document.querySelector<HTMLButtonElement>('#mascot-toggle');
+const mascotSettingsPanel = document.querySelector<HTMLDivElement>('#mascot-settings');
+const mascotModeGroup = document.querySelector<HTMLDivElement>('#mascot-mode-group');
+const mascotSizeSlider = document.querySelector<HTMLInputElement>('#mascot-size');
+const mascotSizeValue = document.querySelector<HTMLOutputElement>('#mascot-size-value');
+const mascotQuietCheck = document.querySelector<HTMLInputElement>('#mascot-quiet');
+const mascotPowerSaveCheck = document.querySelector<HTMLInputElement>('#mascot-powersave');
+const mascotClickThroughCheck = document.querySelector<HTMLInputElement>('#mascot-clickthrough');
+const mascotSatietyFill = document.querySelector<HTMLDivElement>('#mascot-satiety-fill');
+const mascotSatietyPct = document.querySelector<HTMLSpanElement>('#mascot-satiety-pct');
+
+if (
+  !mascotToggle ||
+  !mascotSettingsPanel ||
+  !mascotModeGroup ||
+  !mascotSizeSlider ||
+  !mascotSizeValue ||
+  !mascotQuietCheck ||
+  !mascotPowerSaveCheck ||
+  !mascotClickThroughCheck ||
+  !mascotSatietyFill ||
+  !mascotSatietyPct
+) {
+  throw new Error('Missing mascot controls');
+}
+
+const mascotModeButtons = document.querySelectorAll<HTMLButtonElement>('.mascot-mode-btn');
+
+const normalizeMascotMode = (value: unknown): MascotMode =>
+  value === 'web-page' || value === 'browser-ui' || value === 'random' ? value : 'random';
+
+const updateMascotSatietyUI = (value: number) => {
+  currentMascotSatiety = value;
+  const pct = Math.max(0, Math.min(100, value));
+  mascotSatietyFill.style.width = `${pct}%`;
+  mascotSatietyFill.style.background = pct < 30 ? '#e11d48' : pct < 60 ? '#f97316' : '#16a34a';
+  mascotSatietyPct.textContent = `${pct}%`;
+};
+
+const setMascotModeUI = (mode: MascotMode) => {
+  currentMascotMode = mode;
+  mascotModeButtons.forEach((btn) => {
+    const btnMode = btn.dataset.mode as MascotMode | undefined;
+    const isActive = btnMode === mode;
+    btn.setAttribute('aria-checked', String(isActive));
+    btn.classList.toggle('is-active', isActive);
+  });
+};
+
+const renderMascotControls = () => {
+  mascotToggle.setAttribute('aria-pressed', String(isMascotOpen));
+  mascotToggle.classList.toggle('is-active', isMascotOpen);
+  mascotSettingsPanel.hidden = !isMascotOpen;
+};
+
+const saveMascotSettings = () => {
+  void browser.storage.local.set({ [MASCOT_STORAGE_KEY]: mascotSettings }).catch((error) => {
+    console.warn('Failed to save mascot settings', error);
+  });
+};
+
+const syncMascotState = async () => {
+  try {
+    const state = await getMascotStateInActiveTab();
+    isMascotOpen = state.isOpen;
+    if (state.isOpen && state.mode) {
+      currentMascotMode = state.mode;
+      setMascotModeUI(state.mode);
+      updateMascotSatietyUI(state.satiety ?? 100);
+    }
+  } catch {
+    isMascotOpen = false;
+  }
+  renderMascotControls();
+};
+
+const loadMascotStoredSettings = async () => {
+  try {
+    const result = await browser.storage.local.get(MASCOT_STORAGE_KEY);
+    const stored = result[MASCOT_STORAGE_KEY] as MascotSettings | undefined;
+    if (stored) {
+      mascotSettings = { ...DEFAULT_MASCOT_SETTINGS, ...stored };
+      mascotSizeSlider.value = String(mascotSettings.size);
+      mascotSizeValue.textContent = `${mascotSettings.size}px`;
+      mascotQuietCheck.checked = mascotSettings.quietMode;
+      mascotPowerSaveCheck.checked = mascotSettings.powerSave;
+      mascotClickThroughCheck.checked = mascotSettings.clickThrough;
+      setMascotModeUI(mascotSettings.mode);
+      updateMascotSatietyUI(mascotSettings.satiety);
+    }
+  } catch {
+    // Use defaults
+  }
+};
+
+const handleMascotToggle = async () => {
+  if (pendingAction !== null && pendingAction !== MASCOT_PENDING) return;
+  pendingAction = MASCOT_PENDING;
+  renderGameControls();
+
+  try {
+    if (isMascotOpen) {
+      await closeMascotInActiveTab();
+      isMascotOpen = false;
+      mascotSettings.enabled = false;
+      saveMascotSettings();
+    } else {
+      mascotSettings.enabled = true;
+      const state = await openMascotInActiveTab(mascotSettings);
+      isMascotOpen = state.isOpen;
+      if (state.satiety !== undefined) updateMascotSatietyUI(state.satiety);
+      saveMascotSettings();
+    }
+  } catch (error) {
+    console.warn('Failed to toggle mascot', error);
+    isMascotOpen = !isMascotOpen;
+  } finally {
+    pendingAction = null;
+    renderMascotControls();
+    renderGameControls();
+  }
+};
+
+const handleMascotModeChange = (mode: MascotMode) => {
+  setMascotModeUI(mode);
+  mascotSettings.mode = mode;
+  saveMascotSettings();
+  if (isMascotOpen) {
+    void updateMascotSettingsInActiveTab(mascotSettings).catch((error) => {
+      console.warn('Failed to update mascot mode', error);
+    });
+  }
+};
+
+const handleMascotSizeChange = () => {
+  const size = Math.max(MASCOT_SIZE_MIN, Math.min(MASCOT_SIZE_MAX, Number(mascotSizeSlider.value)));
+  mascotSizeValue.textContent = `${size}px`;
+  mascotSettings.size = size;
+  saveMascotSettings();
+  if (isMascotOpen) {
+    void updateMascotSettingsInActiveTab({ size }).catch((error) => {
+      console.warn('Failed to update mascot size', error);
+    });
+  }
+};
+
+const handleMascotSettingToggle = () => {
+  mascotSettings.quietMode = mascotQuietCheck.checked;
+  mascotSettings.powerSave = mascotPowerSaveCheck.checked;
+  mascotSettings.clickThrough = mascotClickThroughCheck.checked;
+  saveMascotSettings();
+  if (isMascotOpen) {
+    void updateMascotSettingsInActiveTab(mascotSettings).catch((error) => {
+      console.warn('Failed to update mascot settings', error);
+    });
   }
 };
 
@@ -355,7 +607,30 @@ exitButton.addEventListener('click', () => {
 
 backdropBlurSlider.addEventListener('input', handleBackdropBlurInput);
 
+// Mascot event listeners
+mascotToggle.addEventListener('click', () => {
+  void handleMascotToggle();
+});
+
+mascotModeButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const mode = normalizeMascotMode(btn.dataset.mode);
+    if (mode !== currentMascotMode) {
+      handleMascotModeChange(mode);
+    }
+  });
+});
+
+mascotSizeSlider.addEventListener('input', handleMascotSizeChange);
+
+mascotQuietCheck.addEventListener('change', handleMascotSettingToggle);
+mascotPowerSaveCheck.addEventListener('change', handleMascotSettingToggle);
+mascotClickThroughCheck.addEventListener('change', handleMascotSettingToggle);
+
 document.documentElement.lang = browser.i18n.getUILanguage();
 applyPopupTranslations();
 renderGameControls();
+renderMascotControls();
 void syncGameState();
+void syncMascotState();
+void loadMascotStoredSettings();

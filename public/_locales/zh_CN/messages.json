@@ -133,5 +133,38 @@
   },
   "exit": {
     "message": "退出"
+  },
+  "mascotTitle": {
+    "message": "Clawd 桌面宠物"
+  },
+  "mascotToggle": {
+    "message": "ON / OFF"
+  },
+  "mascotMode": {
+    "message": "模式"
+  },
+  "mascotModeRandom": {
+    "message": "自动"
+  },
+  "mascotModeWeb": {
+    "message": "网页"
+  },
+  "mascotModeUI": {
+    "message": "浏览器"
+  },
+  "mascotSize": {
+    "message": "大小"
+  },
+  "mascotQuiet": {
+    "message": "安静模式"
+  },
+  "mascotPowerSave": {
+    "message": "省电模式"
+  },
+  "mascotClickThrough": {
+    "message": "点击穿透"
+  },
+  "mascotSatiety": {
+    "message": "饱腹度"
   }
 }

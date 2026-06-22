@@ -304,3 +304,240 @@ h1 {
   font-weight: 560;
   line-height: 1.3;
 }
+
+/* ── Mascot Panel ── */
+
+.mascot-panel {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 2px solid #000000;
+}
+
+.mascot-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mascot-panel-header span {
+  color: #000000;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.15;
+}
+
+.mascot-toggle {
+  min-width: 54px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 2px solid #000000;
+  border-radius: 0;
+  background: #ffffff;
+  color: #000000;
+  cursor: pointer;
+  font: 800 11px/1 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: background 0.1s, color 0.1s;
+}
+
+.mascot-toggle:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.mascot-toggle.is-active {
+  background: #000000;
+  color: #ffffff;
+}
+
+.mascot-toggle.is-active:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+.mascot-toggle:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+.mascot-settings {
+  display: grid;
+  gap: 10px;
+}
+
+.mascot-settings[hidden] {
+  display: none;
+}
+
+.mascot-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mascot-setting-row span {
+  color: #000000;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.mascot-mode-buttons {
+  display: inline-flex;
+  border: 2px solid #000000;
+}
+
+.mascot-mode-btn {
+  min-width: 0;
+  padding: 4px 8px;
+  border: 0;
+  background: #ffffff;
+  color: #000000;
+  cursor: pointer;
+  font: 700 10px/1 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: background 0.1s, color 0.1s;
+}
+
+.mascot-mode-btn + .mascot-mode-btn {
+  border-left: 1px solid #000000;
+}
+
+.mascot-mode-btn:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.mascot-mode-btn.is-active {
+  background: #000000;
+  color: #ffffff;
+}
+
+.mascot-mode-btn:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: -4px;
+  position: relative;
+  z-index: 1;
+}
+
+.slider {
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border: 1px solid #000000;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -7px;
+  appearance: none;
+  border: 2px solid #000000;
+  border-radius: 0;
+  background: #000000;
+}
+
+.slider::-moz-range-track {
+  height: 4px;
+  border: 1px solid #000000;
+  border-radius: 0;
+  background: #ffffff;
+}
+
+.slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #000000;
+  border-radius: 0;
+  background: #000000;
+}
+
+.slider:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 3px;
+}
+
+.mascot-toggles {
+  display: grid;
+  gap: 6px;
+}
+
+.mascot-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 560;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.mascot-checkbox {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 2px solid #000000;
+  border-radius: 0;
+  appearance: none;
+  background: #ffffff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.mascot-checkbox:checked {
+  background: #000000;
+}
+
+.mascot-checkbox:checked::after {
+  content: "✓";
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.mascot-checkbox:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+.mascot-panel-satiety {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.mascot-panel-satiety span:first-child {
+  color: #000000;
+  font-size: 12px;
+  font-weight: 560;
+  line-height: 1.15;
+}
+
+.mascot-satiety-bar {
+  width: 100%;
+  height: 6px;
+  border: 1px solid #000000;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.mascot-satiety-fill {
+  height: 100%;
+  background: #16a34a;
+  transition: width 0.3s ease, background 0.3s ease;
+}

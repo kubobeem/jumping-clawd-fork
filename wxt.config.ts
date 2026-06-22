@@ -22,7 +22,7 @@ export default defineConfig({
     host_permissions: ['https://xletejbcfylwplhnlbjo.supabase.co/*'],
     web_accessible_resources: [
       {
-        resources: ['game.html'],
+        resources: ['game.html', 'mascot-content.js'],
         matches: ['<all_urls>'],
       },
     ],

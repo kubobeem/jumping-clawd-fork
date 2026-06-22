@@ -133,5 +133,38 @@
   },
   "exit": {
     "message": "終了"
+  },
+  "mascotTitle": {
+    "message": "Clawd マスコット"
+  },
+  "mascotToggle": {
+    "message": "ON / OFF"
+  },
+  "mascotMode": {
+    "message": "モード"
+  },
+  "mascotModeRandom": {
+    "message": "自動"
+  },
+  "mascotModeWeb": {
+    "message": "Web"
+  },
+  "mascotModeUI": {
+    "message": "ブラウザ"
+  },
+  "mascotSize": {
+    "message": "サイズ"
+  },
+  "mascotQuiet": {
+    "message": "お仕事モード"
+  },
+  "mascotPowerSave": {
+    "message": "節電"
+  },
+  "mascotClickThrough": {
+    "message": "クリック透過"
+  },
+  "mascotSatiety": {
+    "message": "満腹度"
   }
 }
