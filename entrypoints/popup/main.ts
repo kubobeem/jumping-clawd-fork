@@ -27,6 +27,9 @@ if (!app) {
   throw new Error('Missing popup root');
 }
 
+const t = (key: string): string =>
+  (browser.i18n.getMessage as (key: string) => string | undefined)(key) || key;
+
 app.innerHTML = `
   <main class="popup" aria-label="Jumping Clawd">
     <header class="popup-header">
@@ -44,14 +47,14 @@ app.innerHTML = `
         </svg>
       </div>
       <div class="brand-copy">
-        <h1>Jumping Clawd</h1>
-        <p>在当前页面跳一跳</p>
+        <h1 id="popup-title">Jumping Clawd</h1>
+        <p id="popup-subtitle"></p>
       </div>
     </header>
 
-    <section class="shortcut-panel" aria-label="快捷键">
+    <section class="shortcut-panel" id="shortcut-panel">
       <div class="shortcut-row">
-        <span>休闲模式</span>
+        <span id="shortcut-casual"></span>
         <span class="key-combo" aria-label="Ctrl comma">
           <kbd>Ctrl</kbd>
           <span class="shortcut-plus">+</span>
@@ -59,7 +62,7 @@ app.innerHTML = `
         </span>
       </div>
       <div class="shortcut-row">
-        <span>挑战模式</span>
+        <span id="shortcut-challenge"></span>
         <span class="key-combo" aria-label="Ctrl period">
           <kbd>Ctrl</kbd>
           <span class="shortcut-plus">+</span>
@@ -67,7 +70,7 @@ app.innerHTML = `
         </span>
       </div>
       <div class="shortcut-row">
-        <span>自动 play</span>
+        <span id="shortcut-autoplay"></span>
         <span class="key-combo" aria-label="Ctrl A">
           <kbd>Ctrl</kbd>
           <span class="shortcut-plus">+</span>
@@ -75,43 +78,33 @@ app.innerHTML = `
         </span>
       </div>
       <div class="shortcut-row">
-        <span>退出游戏</span>
+        <span id="shortcut-exit"></span>
         <span class="key-combo" aria-label="Escape">
           <kbd>Esc</kbd>
         </span>
       </div>
     </section>
 
-    <div class="game-actions" aria-label="游戏控制">
+    <div class="game-actions" id="game-actions">
       <button
         id="start-casual-game"
         class="game-button game-button--mode"
         type="button"
         aria-pressed="false"
-      >
-        休闲模式
-      </button>
+      ></button>
       <button
         id="start-challenge-game"
         class="game-button game-button--mode"
         type="button"
         aria-pressed="false"
-      >
-        挑战模式
-      </button>
-      <button id="exit-game" class="game-button game-button--secondary game-button--exit" type="button">
-        退出游戏
-      </button>
+      ></button>
+      <button id="exit-game" class="game-button game-button--secondary game-button--exit" type="button"></button>
     </div>
 
     <section class="setting" aria-labelledby="backdrop-blur-label">
       <div class="setting-header">
-        <label id="backdrop-blur-label" for="backdrop-blur">
-          背景模糊
-        </label>
-        <output id="backdrop-blur-value" class="setting-value" for="backdrop-blur">
-          ${DEFAULT_BACKDROP_BLUR_PX}px
-        </output>
+        <label id="backdrop-blur-label" for="backdrop-blur"></label>
+        <output id="backdrop-blur-value" class="setting-value" for="backdrop-blur">${DEFAULT_BACKDROP_BLUR_PX}px</output>
       </div>
       <input
         id="backdrop-blur"
@@ -171,8 +164,37 @@ const setStatus = (message: string) => {
   statusText.textContent = message;
 };
 
+const applyPopupTranslations = () => {
+  const titleEl = document.querySelector<HTMLHeadingElement>('#popup-title');
+  const subtitleEl = document.querySelector<HTMLParagraphElement>('#popup-subtitle');
+  const shortcutPanel = document.querySelector<HTMLElement>('#shortcut-panel');
+  const gameActions = document.querySelector<HTMLDivElement>('#game-actions');
+  const blurLabel = document.querySelector<HTMLLabelElement>('#backdrop-blur-label');
+
+  if (titleEl) titleEl.textContent = t('popupTitle');
+  if (subtitleEl) subtitleEl.textContent = t('popupSubtitle');
+  if (shortcutPanel) shortcutPanel.setAttribute('aria-label', t('shortcutPanelLabel'));
+  if (gameActions) gameActions.setAttribute('aria-label', t('gameActionsLabel'));
+
+  const els: Record<string, string> = {
+    'shortcut-casual': 'shortcutCasual',
+    'shortcut-challenge': 'shortcutChallenge',
+    'shortcut-autoplay': 'shortcutAutoPlay',
+    'shortcut-exit': 'shortcutExit',
+    'start-casual-game': 'casualMode',
+    'start-challenge-game': 'challengeMode',
+    'exit-game': 'exitGame',
+    'backdrop-blur-label': 'backgroundBlur',
+  };
+
+  Object.entries(els).forEach(([id, msgKey]) => {
+    const el = document.querySelector<HTMLElement>(`#${id}`);
+    if (el) el.textContent = t(msgKey);
+  });
+};
+
 const getOpenStatus = () =>
-  `自动 play：${currentAutoPlayEnabled ? '开' : '关'}`;
+  `${t('shortcutAutoPlay')}: ${currentAutoPlayEnabled ? 'ON' : 'OFF'}`;
 
 const renderGameControls = () => {
   const isBusy = pendingAction !== null;
@@ -261,7 +283,7 @@ const syncGameState = async () => {
     isGameOpen = false;
     currentGameMode = null;
     currentAutoPlayEnabled = false;
-    setStatus('无法读取游戏状态');
+    setStatus(t('statusCantRead'));
   } finally {
     pendingAction = null;
     renderGameControls();
@@ -275,7 +297,7 @@ const handleStartGame = async (mode: GameMode) => {
 
   pendingAction = 'starting';
   renderGameControls();
-  setStatus(isGameOpen ? '正在切换...' : '正在打开...');
+  setStatus(isGameOpen ? t('statusSwitching') : t('statusOpening'));
 
   try {
     const state = await openGameInActiveTab(mode);
@@ -290,7 +312,7 @@ const handleStartGame = async (mode: GameMode) => {
     isGameOpen = false;
     currentGameMode = null;
     currentAutoPlayEnabled = false;
-    setStatus('当前页面无法打开游戏');
+    setStatus(t('statusCantOpen'));
   } finally {
     pendingAction = null;
     renderGameControls();
@@ -304,17 +326,17 @@ const handleExitGame = async () => {
 
   pendingAction = 'exiting';
   renderGameControls();
-  setStatus('正在退出...');
+  setStatus(t('statusClosing'));
 
   try {
     const state = await closeGameInActiveTab();
     isGameOpen = state.isOpen;
     currentGameMode = state.isOpen ? normalizeGameMode(state.mode) : null;
     currentAutoPlayEnabled = state.isOpen ? state.autoPlay === true : false;
-    setStatus(state.state === 'already-closed' ? '游戏未打开' : '已退出');
+    setStatus(state.state === 'already-closed' ? t('statusNotOpen') : t('statusExited'));
   } catch (error) {
     console.warn('Failed to close Jumping Clawd game', error);
-    setStatus('当前页面无法退出游戏');
+    setStatus(t('statusCantExit'));
   } finally {
     pendingAction = null;
     renderGameControls();
@@ -333,5 +355,7 @@ exitButton.addEventListener('click', () => {
 
 backdropBlurSlider.addEventListener('input', handleBackdropBlurInput);
 
+document.documentElement.lang = browser.i18n.getUILanguage();
+applyPopupTranslations();
 renderGameControls();
 void syncGameState();

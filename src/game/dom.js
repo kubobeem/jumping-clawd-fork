@@ -10,10 +10,12 @@ const getRequiredElement = (selector) => {
 
 const platformElements = Array.from(document.querySelectorAll("[data-platform]"));
 const stageElement = getRequiredElement("[data-stage]");
+const t = (key) => chrome.i18n.getMessage(key) || key;
+
 const GAME_OVER_MODAL_CONTENT = `
   <div class="game-over__panel">
     <section class="game-over__leaderboard" aria-labelledby="game-over-title">
-      <h2 id="game-over-title">\u6392\u884C\u699C</h2>
+      <h2 id="game-over-title">${t('leaderboardTitle')}</h2>
       <ol class="game-over__rank-list" data-rank-list></ol>
     </section>
     <form class="game-over__submit" data-score-form>
@@ -25,21 +27,21 @@ const GAME_OVER_MODAL_CONTENT = `
             maxlength="24"
             autocomplete="off"
             inputmode="text"
-            aria-label="\u8F93\u5165\u4F60\u7684\u5927\u540D"
+            aria-label="${t('playerNameLabel')}"
           />
         </label>
         <strong class="game-over__final-score" data-final-score>0</strong>
-        <button class="game-over__send" data-submit-score type="submit" aria-label="\u4E0A\u699C">
-          \u4E0A\u699C\uD83D\uDC46
+        <button class="game-over__send" data-submit-score type="submit" aria-label="${t('submitScore')}">
+          ${t('submitScore')}
         </button>
       </div>
     </form>
     <div class="game-over__actions">
       <button class="game-over__button game-over__button--primary" data-retry-game type="button">
-        \u518D\u6765\u4E00\u6B21
+        ${t('retry')}
       </button>
       <button class="game-over__button game-over__button--secondary" data-exit-game type="button">
-        \u9000\u51FA
+        ${t('exit')}
       </button>
     </div>
   </div>

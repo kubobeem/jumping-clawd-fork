@@ -2,37 +2,50 @@
 
 # Jumping Clawd
 
-Jumping Clawd 是一个基于 [WXT](https://wxt.dev/) 的浏览器扩展小游戏。它可以在当前网页上以遮罩层形式启动，也可以在空白页、新标签页等场景下打开独立游戏页。
+Jumping Clawd is a browser extension mini-game built with [WXT](https://wxt.dev/). It can launch as an overlay on any web page, or open as a standalone game in a blank tab.
 
-## 开发环境
+## 🌐 Multi-language Support
 
-- Node.js `>=20.12.0`：WXT `0.20.26` 的要求。
-- npm：项目使用 `package-lock.json` 锁定依赖版本。
-- Chromium 系浏览器或 Firefox：用于加载开发版扩展。
+Jumping Clawd supports **English**, **日本語 (Japanese)**, and **中文 (Chinese)**. The language is automatically selected based on your browser's language settings.
 
-首次拉取后安装依赖：
+Translations are stored in `public/_locales/`:
+| Directory | Language |
+|-----------|----------|
+| `_locales/en/` | English |
+| `_locales/ja/` | 日本語 |
+| `_locales/zh_CN/` | 中文（简体） |
+
+To add a new language, create a new directory under `public/_locales/` (e.g., `ko/` for Korean) with a `messages.json` file containing all message keys. The keys must match those in the existing locale files.
+
+## Prerequisites
+
+- Node.js `>=20.12.0` (required by WXT `0.20.26`)
+- npm (uses `package-lock.json` for dependency locking)
+- Chromium-based browser or Firefox (for loading the development extension)
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-安装后 WXT 会通过 `postinstall` 自动生成 `.wxt/` 类型与运行时文件。这个目录是本地生成产物，不需要提交。
+After installation, WXT automatically generates `.wxt/` type definitions and runtime files via `postinstall`. This directory is a local build artifact and should not be committed.
 
-## 本地开发
+## Local Development
 
-启动 Chrome/Chromium 开发模式：
+Start Chrome/Chromium dev mode:
 
 ```bash
 npm run dev
 ```
 
-启动 Firefox 开发模式：
+Start Firefox dev mode:
 
 ```bash
 npm run dev:firefox
 ```
 
-常用检查与打包命令：
+Common check & build commands:
 
 ```bash
 npm run compile
@@ -42,53 +55,58 @@ npm run zip
 npm run zip:firefox
 ```
 
-开发阶段通常使用 `npm run dev` 即可，发布前再运行类型检查、构建和打包。
+During development, use `npm run dev`. Before publishing, run type checking, build, and packaging.
 
-## 如何在此基础上开发
+## Project Structure
 
-主要目录：
-
-| 路径 | 作用 |
+| Path | Purpose |
 | --- | --- |
-| `wxt.config.ts` | 扩展 manifest 配置，包括权限、图标、快捷键、可访问资源。 |
-| `entrypoints/background.ts` | 后台脚本，负责响应扩展快捷键并打开游戏。 |
-| `entrypoints/popup/` | 扩展弹窗 UI，包含开始/退出游戏和背景模糊设置。 |
-| `entrypoints/page-game-overlay.ts` | 注入网页的遮罩层脚本，负责创建 iframe、消息通信、关闭游戏和页面背景处理。 |
-| `entrypoints/game.html` | 游戏页 HTML，既用于独立页，也用于网页遮罩 iframe。 |
-| `src/extension/` | 扩展侧通用逻辑，包括打开游戏、消息类型、背景模糊存储。 |
-| `src/game/` | 游戏主体逻辑、动画、排行榜、DOM 引用、样式和参数配置。 |
-| `public/icon/` | 扩展图标资源。 |
+| `wxt.config.ts` | Extension manifest config (permissions, icons, shortcuts, web-accessible resources) |
+| `entrypoints/background.ts` | Background script - handles extension shortcuts to open the game |
+| `entrypoints/popup/` | Extension popup UI - start/exit game and backdrop blur settings |
+| `entrypoints/page-game-overlay.ts` | Injected page overlay script - creates iframe, message passing, game close, page background handling |
+| `entrypoints/game.html` | Game page HTML - used for both standalone pages and overlay iframes |
+| `src/extension/` | Extension-side common logic - open game, message types, backdrop blur storage |
+| `src/game/` | Game logic, animation, leaderboard, DOM references, styles, and config |
+| `public/icon/` | Extension icon assets |
+| `public/_locales/` | Multi-language translation files |
 
-开发游戏玩法时，优先从这些文件入手：
+### Game Development
 
-- `src/game/config.js`：调整平台距离、跳跃节奏、角色尺寸、尖刺、蓄力条和挑战模式参数。
-- `src/game/clawd-motion.js`：调整 Clawd 的跳跃姿态、拉伸、残影和手臂动画。
-- `src/game/app.js`：处理游戏状态机、输入、碰撞、得分、复活和排行榜弹窗。
-- `src/game/styles.css`：调整舞台、角色、平台、尖刺和游戏结束面板视觉样式。
+Start with these files when working on gameplay:
 
-开发扩展能力时，优先从这些文件入手：
+- `src/game/config.js` — Adjust platform distances, jump timing, character size, spikes, charge meter, and challenge mode parameters
+- `src/game/clawd-motion.js` — Adjust Clawd's jump pose, stretch, smear, and arm animations
+- `src/game/app.js` — Game state machine, input handling, collision, scoring, respawn, leaderboard popup
+- `src/game/styles.css` — Stage, character, platform, spike, and game-over panel styles
 
-- `src/extension/open-game.ts`：修改打开独立页或网页遮罩层的策略。
-- `entrypoints/page-game-overlay.ts`：修改网页注入、遮罩行为、快捷键、iframe 通信和页面背景处理。
-- `entrypoints/popup/main.ts`：修改弹窗按钮、状态和设置项。
-- `wxt.config.ts`：新增权限、host permissions、快捷键或扩展资源。
+### Extension Development
 
-排行榜逻辑在 `src/game/leaderboard.js`。当前代码使用 Supabase publishable key 直接从浏览器访问 REST API；如果更换 Supabase 项目或表结构，需要同步更新：
+Start with these files when working on extension features:
 
-- `src/game/leaderboard.js` 中的 REST URL、publishable key 和表字段。
-- `wxt.config.ts` 中的 `host_permissions`。
-- Supabase 端的 RLS/权限策略，确保公开客户端只能执行预期读写操作。
+- `src/extension/open-game.ts` — Strategy for opening standalone pages or overlay mode
+- `entrypoints/page-game-overlay.ts` — Page injection, overlay behavior, shortcuts, iframe communication, page background handling
+- `entrypoints/popup/main.ts` — Popup buttons, state, and settings
+- `wxt.config.ts` — Add permissions, host permissions, shortcuts, or extension resources
 
-## Git 与生成文件
+### Leaderboard
 
-应提交的开发环境和源码文件已经包含在仓库中：
+Leaderboard logic is in `src/game/leaderboard.js`. It uses a Supabase publishable key to access the REST API directly from the browser. If you change the Supabase project or table structure, update:
 
-- `package.json`、`package-lock.json`
-- `wxt.config.ts`、`tsconfig.json`
-- `entrypoints/`、`src/`、`public/`、`assets/`、`components/`
+- The REST URL, publishable key, and table fields in `src/game/leaderboard.js`
+- `host_permissions` in `wxt.config.ts`
+- Supabase RLS/permissions policies to ensure public clients can only perform expected read/write operations
+
+## Git & Generated Files
+
+Files to commit (source code and environment config):
+
+- `package.json`, `package-lock.json`
+- `wxt.config.ts`, `tsconfig.json`
+- `entrypoints/`, `src/`, `public/`, `assets/`, `components/`
 - `AGENTS.md`
 
-不应提交的本地生成文件已经由 `.gitignore` 忽略：
+Files to NOT commit (local build artifacts — already in `.gitignore`):
 
 - `node_modules/`
 - `.wxt/`
@@ -96,6 +114,4 @@ npm run zip:firefox
 - `out/`
 - `.env*`
 - `.DS_Store`
-- 本地编辑器配置
-
-如果后续有必须随项目共享的 VS Code 推荐插件，可以新增 `.vscode/extensions.json`；其他 `.vscode` 本机设置默认不提交。
+- Local editor config

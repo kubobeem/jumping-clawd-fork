@@ -1,0 +1,137 @@
+{
+  "extensionName": {
+    "message": "Jumping Clawd"
+  },
+  "extensionShortName": {
+    "message": "Clawd Jump"
+  },
+  "extensionDescription": {
+    "message": "Jump while you wait — 待ち時間にひとっ飛び"
+  },
+  "extensionDefaultTitle": {
+    "message": "Jumping Clawd"
+  },
+  "commandCasualDescription": {
+    "message": "現在のページでJumping Clawdのカジュアルモードを開始"
+  },
+  "commandChallengeDescription": {
+    "message": "現在のページでJumping Clawdのチャレンジモードを開始"
+  },
+  "popupTitle": {
+    "message": "Jumping Clawd"
+  },
+  "popupSubtitle": {
+    "message": "今いるページでひとっ飛び"
+  },
+  "shortcutCasual": {
+    "message": "カジュアルモード"
+  },
+  "shortcutChallenge": {
+    "message": "チャレンジモード"
+  },
+  "shortcutAutoPlay": {
+    "message": "自動プレイ"
+  },
+  "shortcutExit": {
+    "message": "ゲームを終了"
+  },
+  "shortcutPanelLabel": {
+    "message": "キーボードショートカット"
+  },
+  "gameActionsLabel": {
+    "message": "ゲーム操作"
+  },
+  "casualMode": {
+    "message": "カジュアル"
+  },
+  "challengeMode": {
+    "message": "チャレンジ"
+  },
+  "exitGame": {
+    "message": "ゲームを終了"
+  },
+  "backgroundBlur": {
+    "message": "背景ブラー"
+  },
+  "statusLoading": {
+    "message": "読み込み中…"
+  },
+  "statusSwitching": {
+    "message": "切り替え中…"
+  },
+  "statusOpening": {
+    "message": "開いています…"
+  },
+  "statusClosing": {
+    "message": "閉じています…"
+  },
+  "statusNotOpen": {
+    "message": "ゲームは開いていません"
+  },
+  "statusExited": {
+    "message": "終了しました"
+  },
+  "statusCantRead": {
+    "message": "ゲームの状態を読めません"
+  },
+  "statusCantOpen": {
+    "message": "このページではゲームを開けません"
+  },
+  "statusCantExit": {
+    "message": "このページではゲームを終了できません"
+  },
+  "gameScoreLabel": {
+    "message": "スコア"
+  },
+  "gameStageLabel": {
+    "message": "Clawd ジャンプゲームステージ"
+  },
+  "gameAriaLabel": {
+    "message": "Clawd ジャンプゲーム"
+  },
+  "controlsHintCharge": {
+    "message": "スペースでチャージ"
+  },
+  "controlsHintJump": {
+    "message": "離してジャンプ"
+  },
+  "controlsHintAria": {
+    "message": "スペースを押してチャージ、離してジャンプ"
+  },
+  "leaderboardTitle": {
+    "message": "ランキング"
+  },
+  "playerNameLabel": {
+    "message": "名前を入力"
+  },
+  "submitScore": {
+    "message": "送信　👆"
+  },
+  "rankLoading": {
+    "message": "読み込み中…"
+  },
+  "rankError": {
+    "message": "ランキングを取得できません"
+  },
+  "rankEmpty": {
+    "message": "まだ記録がありません"
+  },
+  "rankSubmitting": {
+    "message": "送信中…"
+  },
+  "rankHigherScore": {
+    "message": "より高いスコアが存在します"
+  },
+  "rankSubmitted": {
+    "message": "ランクイン！"
+  },
+  "rankRetry": {
+    "message": "再試行"
+  },
+  "retry": {
+    "message": "もう一度"
+  },
+  "exit": {
+    "message": "終了"
+  }
+}

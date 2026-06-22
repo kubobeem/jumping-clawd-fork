@@ -32,11 +32,10 @@
           class="controls-hint"
           data-controls-hint
           role="status"
-          aria-label="按空格蓄力，松空格跳跃"
           hidden
         >
-          <span>按空格蓄力</span>
-          <span>松空格跳跃</span>
+          <span data-hint-charge></span>
+          <span data-hint-jump></span>
         </div>
 
         <div class="clawd-layer clawd-layer--smear" data-clawd-smear aria-hidden="true">
@@ -97,7 +96,7 @@
         >
           <div class="game-over__panel">
             <section class="game-over__leaderboard" aria-labelledby="game-over-title">
-              <h2 id="game-over-title">排行榜</h2>
+              <h2 id="game-over-title"></h2>
               <ol class="game-over__rank-list" data-rank-list></ol>
             </section>
             <form class="game-over__submit" data-score-form>
@@ -109,28 +108,38 @@
                     maxlength="24"
                     autocomplete="off"
                     inputmode="text"
-                    aria-label="输入你的大名"
                   />
                 </label>
                 <strong class="game-over__final-score" data-final-score>0</strong>
-                <button class="game-over__send" data-submit-score type="submit" aria-label="上榜">
-                  上榜👆
-                </button>
+                <button class="game-over__send" data-submit-score type="submit"></button>
               </div>
             </form>
             <div class="game-over__actions">
-              <button class="game-over__button game-over__button--primary" data-retry-game type="button">
-                再来一次
-              </button>
-              <button class="game-over__button game-over__button--secondary" data-exit-game type="button">
-                退出
-              </button>
+              <button class="game-over__button game-over__button--primary" data-retry-game type="button"></button>
+              <button class="game-over__button game-over__button--secondary" data-exit-game type="button"></button>
             </div>
           </div>
         </div>
       </section>
     </main>
 
+    <script>
+      // Apply i18n translations to the game page
+      (function() {
+        const t = (key) => chrome.i18n.getMessage(key) || key;
+        document.documentElement.lang = chrome.i18n.getUILanguage();
+
+        document.querySelector('[data-hint-charge]').textContent = t('controlsHintCharge');
+        document.querySelector('[data-hint-jump]').textContent = t('controlsHintJump');
+        document.querySelector('[data-controls-hint]').setAttribute('aria-label', t('controlsHintAria'));
+        document.querySelector('#game-over-title').textContent = t('leaderboardTitle');
+        document.querySelector('[data-player-name]').setAttribute('aria-label', t('playerNameLabel'));
+        document.querySelector('[data-submit-score]').textContent = t('submitScore');
+        document.querySelector('[data-submit-score]').setAttribute('aria-label', t('submitScore'));
+        document.querySelector('[data-retry-game]').textContent = t('retry');
+        document.querySelector('[data-exit-game]').textContent = t('exit');
+      })();
+    </script>
     <script type="module" src="/src/game/app.js"></script>
   </body>
 </html>

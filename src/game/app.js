@@ -86,6 +86,8 @@ import {
   normalizeName,
 } from "./leaderboard.js";
 
+const t = (key) => chrome.i18n.getMessage(key) || key;
+
 const PAGE_SURFACE_THEMES = new Set(["light", "dark"]);
 const GAME_MODES = new Set(["casual", "challenge"]);
 const DEFAULT_GAME_MODE = "casual";
@@ -319,10 +321,10 @@ const renderRankList = () => {
   if (entries.length === 0) {
     renderRankStatus(
       rankState.isLoading && !rankState.hasLoaded
-        ? "加载中"
+        ? t('rankLoading')
         : rankState.error
-          ? "榜单暂时连不上"
-          : "暂无记录",
+          ? t('rankError')
+          : t('rankEmpty'),
     );
     return;
   }
@@ -426,7 +428,7 @@ const submitPlayerScore = async () => {
   rankState.isSubmitting = true;
   rankState.error = null;
   submitScoreButton.classList.remove("is-sent");
-  submitScoreButton.textContent = "提交中";
+  submitScoreButton.textContent = t('rankSubmitting');
   updateScoreSubmitState();
 
   try {
@@ -440,7 +442,7 @@ const submitPlayerScore = async () => {
       localStorage.setItem(PLAYER_NAME_STORAGE_KEY, name);
       renderRankList();
       submitScoreButton.classList.add("is-sent");
-      submitScoreButton.textContent = "已有更高分";
+      submitScoreButton.textContent = t('rankHigherScore');
       return;
     }
 
@@ -455,12 +457,12 @@ const submitPlayerScore = async () => {
     mergeRankEntry(entry);
     renderRankList();
     submitScoreButton.classList.add("is-sent");
-    submitScoreButton.textContent = "已上榜";
+    submitScoreButton.textContent = t('rankSubmitted');
     void loadRankEntries();
   } catch (error) {
     rankState.error = error;
     console.warn("Failed to submit score", error);
-    submitScoreButton.textContent = "重试";
+    submitScoreButton.textContent = t('rankRetry');
     renderRankList();
   } finally {
     rankState.isSubmitting = false;
@@ -1442,7 +1444,7 @@ const syncHud = () => {
   const chargeFeedback = getChargeFeedback(game.chargePower);
   const chargeStyleFeedback = isChallengeMode() ? "low" : chargeFeedback;
 
-  scoreValue.textContent = `score: ${game.score}`;
+  scoreValue.textContent = `${t('gameScoreLabel')}: ${game.score}`;
   chargeFill.style.transform = `translateY(${(1 - game.chargePower) * 100}%)`;
   chargeFill.style.setProperty(
     "--charge-color",
@@ -1472,7 +1474,7 @@ const showChallengeGameOver = () => {
   rankState.highlightedEntryId = null;
   rankState.hasSubmittedCurrentScore = false;
   submitScoreButton.classList.remove("is-sent");
-  submitScoreButton.textContent = "上榜👆";
+  submitScoreButton.textContent = t('submitScore');
   const savedName = localStorage.getItem(PLAYER_NAME_STORAGE_KEY);
   if (savedName) {
     playerNameInput.value = savedName;
@@ -2479,7 +2481,7 @@ playerNameInput.addEventListener("input", () => {
   }
 
   submitScoreButton.classList.remove("is-sent");
-  submitScoreButton.textContent = "上榜👆";
+  submitScoreButton.textContent = t('submitScore');
   updateScoreSubmitState();
 });
 

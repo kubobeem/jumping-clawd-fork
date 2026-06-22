@@ -1,0 +1,137 @@
+{
+  "extensionName": {
+    "message": "Jumping Clawd"
+  },
+  "extensionShortName": {
+    "message": "Clawd Jump"
+  },
+  "extensionDescription": {
+    "message": "Jump while you wait — a fun mini-game for those in-between moments"
+  },
+  "extensionDefaultTitle": {
+    "message": "Jumping Clawd"
+  },
+  "commandCasualDescription": {
+    "message": "Start Jumping Clawd casual mode on the current page"
+  },
+  "commandChallengeDescription": {
+    "message": "Start Jumping Clawd challenge mode on the current page"
+  },
+  "popupTitle": {
+    "message": "Jumping Clawd"
+  },
+  "popupSubtitle": {
+    "message": "Jump on the current page"
+  },
+  "shortcutCasual": {
+    "message": "Casual mode"
+  },
+  "shortcutChallenge": {
+    "message": "Challenge mode"
+  },
+  "shortcutAutoPlay": {
+    "message": "Auto Play"
+  },
+  "shortcutExit": {
+    "message": "Exit game"
+  },
+  "shortcutPanelLabel": {
+    "message": "Keyboard shortcuts"
+  },
+  "gameActionsLabel": {
+    "message": "Game controls"
+  },
+  "casualMode": {
+    "message": "Casual"
+  },
+  "challengeMode": {
+    "message": "Challenge"
+  },
+  "exitGame": {
+    "message": "Exit Game"
+  },
+  "backgroundBlur": {
+    "message": "Background Blur"
+  },
+  "statusLoading": {
+    "message": "Loading..."
+  },
+  "statusSwitching": {
+    "message": "Switching..."
+  },
+  "statusOpening": {
+    "message": "Opening..."
+  },
+  "statusClosing": {
+    "message": "Closing..."
+  },
+  "statusNotOpen": {
+    "message": "Game not open"
+  },
+  "statusExited": {
+    "message": "Exited"
+  },
+  "statusCantRead": {
+    "message": "Cannot read game state"
+  },
+  "statusCantOpen": {
+    "message": "Cannot open game on this page"
+  },
+  "statusCantExit": {
+    "message": "Cannot exit game on this page"
+  },
+  "gameScoreLabel": {
+    "message": "score"
+  },
+  "gameStageLabel": {
+    "message": "Clawd jump game stage"
+  },
+  "gameAriaLabel": {
+    "message": "Clawd jump game"
+  },
+  "controlsHintCharge": {
+    "message": "Hold Space to charge"
+  },
+  "controlsHintJump": {
+    "message": "Release Space to jump"
+  },
+  "controlsHintAria": {
+    "message": "Hold Space to charge, release to jump"
+  },
+  "leaderboardTitle": {
+    "message": "Leaderboard"
+  },
+  "playerNameLabel": {
+    "message": "Enter your name"
+  },
+  "submitScore": {
+    "message": "Submit 👆"
+  },
+  "rankLoading": {
+    "message": "Loading..."
+  },
+  "rankError": {
+    "message": "Leaderboard unavailable"
+  },
+  "rankEmpty": {
+    "message": "No records yet"
+  },
+  "rankSubmitting": {
+    "message": "Submitting..."
+  },
+  "rankHigherScore": {
+    "message": "Higher score exists"
+  },
+  "rankSubmitted": {
+    "message": "Ranked!"
+  },
+  "rankRetry": {
+    "message": "Retry"
+  },
+  "retry": {
+    "message": "Play Again"
+  },
+  "exit": {
+    "message": "Exit"
+  }
+}

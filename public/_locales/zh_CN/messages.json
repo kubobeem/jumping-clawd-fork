@@ -1,0 +1,137 @@
+{
+  "extensionName": {
+    "message": "Jumping Clawd"
+  },
+  "extensionShortName": {
+    "message": "Clawd Jump"
+  },
+  "extensionDescription": {
+    "message": "Jump while you wait — 网页等待时来局跳一跳"
+  },
+  "extensionDefaultTitle": {
+    "message": "Jumping Clawd"
+  },
+  "commandCasualDescription": {
+    "message": "在当前页面打开 Jumping Clawd 休闲模式"
+  },
+  "commandChallengeDescription": {
+    "message": "在当前页面打开 Jumping Clawd 挑战模式"
+  },
+  "popupTitle": {
+    "message": "Jumping Clawd"
+  },
+  "popupSubtitle": {
+    "message": "在当前页面跳一跳"
+  },
+  "shortcutCasual": {
+    "message": "休闲模式"
+  },
+  "shortcutChallenge": {
+    "message": "挑战模式"
+  },
+  "shortcutAutoPlay": {
+    "message": "自动 play"
+  },
+  "shortcutExit": {
+    "message": "退出游戏"
+  },
+  "shortcutPanelLabel": {
+    "message": "快捷键"
+  },
+  "gameActionsLabel": {
+    "message": "游戏控制"
+  },
+  "casualMode": {
+    "message": "休闲"
+  },
+  "challengeMode": {
+    "message": "挑战"
+  },
+  "exitGame": {
+    "message": "退出游戏"
+  },
+  "backgroundBlur": {
+    "message": "背景模糊"
+  },
+  "statusLoading": {
+    "message": "加载中"
+  },
+  "statusSwitching": {
+    "message": "正在切换..."
+  },
+  "statusOpening": {
+    "message": "正在打开..."
+  },
+  "statusClosing": {
+    "message": "正在退出..."
+  },
+  "statusNotOpen": {
+    "message": "游戏未打开"
+  },
+  "statusExited": {
+    "message": "已退出"
+  },
+  "statusCantRead": {
+    "message": "无法读取游戏状态"
+  },
+  "statusCantOpen": {
+    "message": "当前页面无法打开游戏"
+  },
+  "statusCantExit": {
+    "message": "当前页面无法退出游戏"
+  },
+  "gameScoreLabel": {
+    "message": "score"
+  },
+  "gameStageLabel": {
+    "message": "Clawd 跳一跳舞台"
+  },
+  "gameAriaLabel": {
+    "message": "Clawd 跳一跳"
+  },
+  "controlsHintCharge": {
+    "message": "按空格蓄力"
+  },
+  "controlsHintJump": {
+    "message": "松空格跳跃"
+  },
+  "controlsHintAria": {
+    "message": "按空格蓄力，松空格跳跃"
+  },
+  "leaderboardTitle": {
+    "message": "排行榜"
+  },
+  "playerNameLabel": {
+    "message": "输入你的大名"
+  },
+  "submitScore": {
+    "message": "上榜👆"
+  },
+  "rankLoading": {
+    "message": "加载中"
+  },
+  "rankError": {
+    "message": "榜单暂时连不上"
+  },
+  "rankEmpty": {
+    "message": "暂无记录"
+  },
+  "rankSubmitting": {
+    "message": "提交中"
+  },
+  "rankHigherScore": {
+    "message": "已有更高分"
+  },
+  "rankSubmitted": {
+    "message": "已上榜"
+  },
+  "rankRetry": {
+    "message": "重试"
+  },
+  "retry": {
+    "message": "再来一次"
+  },
+  "exit": {
+    "message": "退出"
+  }
+}
